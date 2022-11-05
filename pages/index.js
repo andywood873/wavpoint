@@ -1,6 +1,8 @@
 import Head from "next/head"
 import Link from "next/link"
+import Footer from "../components/Footer"
 import Header from "../components/Header"
+import LowerPanel from "../components/LowerPanel"
 import Popular from "../components/Popular"
 import Recent from "../components/Recent"
 import styles from "../styles/Home.module.css"
@@ -17,10 +19,16 @@ export default function Home() {
 					rel="stylesheet"
 				/>
 			</Head>
-			<div className="container">
-				<Header />
-				<Popular />
-				<Recent/>
+			<div className="divide-y-8">
+				<div>
+					<Header />
+					<Popular />
+					<Recent />
+					<LowerPanel />
+				</div>
+				<div>
+					<Footer />
+				</div>
 			</div>
 		</div>
 	)

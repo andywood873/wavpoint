@@ -1,8 +1,10 @@
+import { Center } from "@chakra-ui/react"
+import { Button } from "@mui/material"
 import Card from "./Card"
 
 export default function Recent() {
 	return (
-		<div className="absolute top-[220rem] md:top-[75rem] lg:top-[75rem] 2xl:top-[85rem] mr-10">
+		<div className="relative top-[55rem] md:top-[35rem] lg:top-[30rem] 2xl:top-[25em] ">
 			<h1 className="text-4xl md:text-[1.6rem] lg:text-4xl font-azeretcus mb-4">
 				Recent
 			</h1>
@@ -49,7 +51,11 @@ export default function Recent() {
 						createdBy="Chillington"
 					/>
 				</div>
-				
+			</div>
+			<div className="container min-w-full mb-20">
+				<Center>
+					<button className="bg-[#222222] px-[3.75rem] py-6 min-w-full font-bold text-white rounded-lg text-3xl md:min-w-min md:text-base md:py-3 md:rounded lg:w-1/3 lg:py-4">Load More</button>
+				</Center>
 			</div>
 		</div>
 	)

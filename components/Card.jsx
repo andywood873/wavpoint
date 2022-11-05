@@ -37,17 +37,18 @@ export default function Card(props) {
 							{isPlaying ? (
 								<Center>
 									<IconButton onClick={stopAudio} className="z-10">
-										<PauseCircleFilledIcon
-											sx={{ fontSize: 100, color: "#FF6700" }}
-										/>
+										{/* <PauseCircleFilledIcon
+											sx={{ fontSize: 150, color: "#FF6700" }}
+										/> */}
+										<img src="/stop_icon.svg"></img>
 									</IconButton>
 								</Center>
 							) : (
 								<Center>
 									<IconButton onClick={playAudio} className=" z-10">
-										<PlayCircleFilledIcon
-											sx={{ fontSize: 100, color: "#FF6700" }}
-										/>
+										{/* <PlayCircleFilledIcon
+											sx={{ fontSize: 120, color: "#FF6700" }}
+										/> */}<img src="/play_icon.svg"></img>
 									</IconButton>
 								</Center>
 							)}

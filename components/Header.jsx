@@ -4,7 +4,7 @@ import ConnectButton from "./Connect"
 
 export default function Header() {
 	return (
-		<div className="flex justify-between">
+		<div className="flex justify-between relative">
 			{/* <image src="/wavthe0ry-logo2@3x.png" width="148px" height="92px" alt="wavThe0ry Logo" wid/> */}
 			<div className="absolute top-10 left-10 md:top-8 md:left-10 lg:left-8 lg:top-6">
 				<img
