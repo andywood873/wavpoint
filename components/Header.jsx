@@ -1,5 +1,6 @@
 import { Button } from "@mui/material"
 import Image from "next/image"
+import Link from "next/link"
 import ConnectButton from "./Connect"
 
 export default function Header() {
@@ -14,9 +15,10 @@ export default function Header() {
 				/>
 			</div>
 			<div className="justify-between items-center">
+				<Link href="/mediaUpload">
 				<h2 className="absolute font-['DM Sans'] inline invisible lg:visible text-sm font-medium leading-6 top-9 right-48">
 					Deploy Drop
-				</h2>
+				</h2></Link>
 				<ConnectButton />
 			</div>
 			<div className="md:flex">
