@@ -1,23 +1,19 @@
 import { Center } from "@chakra-ui/react"
-import { Label } from "@mui/icons-material"
-import {
-	Box,
-	Fab,
-	FormControl,
-	InputAdornment,
-	Stack,
-	TextField,
-} from "@mui/material"
+import { Box, Fab, InputAdornment, Stack, TextField } from "@mui/material"
 import Image from "next/image"
 import { useState } from "react"
 import Navbar from "../components/Navbar"
 import AddIcon from "@mui/icons-material/Add"
-import Link from "next/link"
 import Footer from "../components/Footer"
+import { Web3Storage } from "web3.storage"
+import LitJsSdk from "@lit-protocol/sdk-browser";
 
 export default function MediaUpload() {
 	const [tracklistCounter, setTracklistCounter] = useState(1)
 	const [splitCounter, setSplitCounter] = useState(1)
+	const [input, setInput] = useState("0x12E618dDA8A05532f5e20286f849a372220B0b60")
+	const [selectedFile, setSelectedFile] = useState(null)
+	const [loading, setLoading] = useState(false)
 	function increaseTracks() {
 		setTracklistCounter(tracklistCounter + 1)
 	}
@@ -25,13 +21,89 @@ export default function MediaUpload() {
 	function increaseSplit() {
 		setSplitCounter(splitCounter + 1)
 	}
+
+	const control = [
+		{
+			conditionType: "evmBasic",
+			contractAddress: input,
+			standardContractType: "ERC721",
+			chain: "ethereum",
+			method: "balanceOf",
+			parameters: [":userAddress"],
+			returnValueTest: {
+				comparator: ">=",
+				value: "1",
+			},
+		},
+	]
+	async function encrypt() {
+		const client = new LitJsSdk.LitNodeClient()
+		await client.connect()
+		window.litNodeClient = client
+		const accessControlConditions = control
+		const chain = "goerli"
+
+		await client.connect()
+		const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
+		console.log("Authenticated MEssage:- ")
+		console.log(authSig)
+		console.log("The selected file- ")
+		console.log(selectedFile);
+		const { zipBlob, encryptedSymmetricKey, symmetricKey } =
+			await LitJsSdk.encryptFileAndZipWithMetadata({
+				file: selectedFile,
+				authSig: authSig,
+				accessControlConditions: accessControlConditions,
+				chain: chain,
+				litNodeClient: window.litNodeClient,
+				unifiedAccessControlConditions: [accessControlConditions],
+			})
+
+		console.log("Symmetric Key :- ")
+		console.log(symmetricKey)
+
+		console.log("Encrypted Symmetric Key:-")
+		console.log(encryptedSymmetricKey)
+		console.log("Enxrypted File")
+		console.log(zipBlob)
+
+		return {
+			zipBlob,
+			encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
+				encryptedSymmetricKey,
+				"base16",
+			),
+			accessControlConditions,
+		}
+	}
+
+	async function uploadIpfs() {
+		setLoading(true)
+		const token = process.env.NEXT_PUBLIC_WEB3_STORAGE
+		const web3Client = new Web3Storage({ token: token })
+
+		console.log("Getting Encrypted FIle and key...")
+		const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
+			await encrypt()
+		console.log("Done getting Encrypted FIle and key")
+
+		console.log("Putting files on ipfs.....")
+		const cid = await web3Client.put([new File([zipBlob], "upload.zip")])
+
+		console.log("Uploaded to IPFS successfully. CID is :- ")
+		console.log(cid)
+		setLoading(false)
+		alert(`Your Files have been encrypted with LIT and Uploaded to IPFS heres is your CID:- ${cid}`)
+	}
+
+
 	return (
 		<div>
 			<Navbar />
 			<div className="absolute top-48 px-1/2 min-w-full">
 				<Center>
 					<div>
-						<h1 className="mb-5 text-3xl font-['DM Sans'] font-medium">
+						<h1 className="mb-0 text-3xl font-['DM Sans'] font-medium">
 							Media Upload
 						</h1>
 						<div className="flex">
@@ -79,6 +151,9 @@ export default function MediaUpload() {
 										accept="image/*"
 										type="file"
 										hidden
+										onChange={(e) => {
+											setSelectedFile(e.target.files[0])
+										}}
 									/>
 								</div>
 							</div>
@@ -96,6 +171,7 @@ export default function MediaUpload() {
 									accept="audio/*"
 									className="input_audio"
 									hidden
+									
 								/>
 								<Center>
 									<Image
@@ -206,7 +282,7 @@ export default function MediaUpload() {
 										{" "}
 										Cancel
 									</button>
-									<button className="rounded-md border-[#222222] px-20 py-4 font-medium text-xl text-white bg-black">
+									<button className="rounded-md border-[#222222] px-20 py-4 font-medium text-xl text-white bg-black" onClick={uploadIpfs}>
 										Upload
 									</button>
 								</div>
@@ -215,7 +291,7 @@ export default function MediaUpload() {
 					</div>
 				</Center>
 			</div>
-			<div className="mt-[30rem]">
+			<div className="mt-[50rem] mb-0 pb-0">
 				<Footer />
 			</div>
 		</div>

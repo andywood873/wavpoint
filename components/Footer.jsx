@@ -43,7 +43,7 @@ export default function Footer() {
 					</div>
 				</div>
 			</div>
-			<div className="text-center pb-14 md:text-right lg:invisible">
+			<div className="text-center pb-10 md:text-right lg:invisible">
 				<span className="text-2xl font-medium text-[#888888] md:text-xl">
 					© Copyright 2022 Wavpoint, Inc.
 				</span>
