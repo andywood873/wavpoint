@@ -1,8 +1,8 @@
 import { Center } from "@chakra-ui/react"
 
-export default function Footer() {
+export default function MediaFooter() {
 	return (
-		<div className="relative top-[100rem] md:top-[80rem] border-slate-200 border-t-4 pt-20 md:pt-10 items-center ">
+		<div className="relative top-[100rem] md:top-[20rem] border-slate-200 border-t-4 pt-20 md:pt-10 items-center px-10">
 			<div className="md:flex justify-between">
 				<Center>
 					<div className="lg:2/3">
@@ -19,7 +19,7 @@ export default function Footer() {
 						</span>
 					</div>
 				</div>
-				<div className="flex justify-between items-center my-14">
+				<div className="flex justify-between items-center my-10">
 					<div>
 						<h2 className="text-2xl font-medium md:text-xl">Twitter</h2>
 					</div>
@@ -43,7 +43,7 @@ export default function Footer() {
 					</div>
 				</div>
 			</div>
-			<div className="text-center pb-10 md:text-right lg:invisible">
+			<div className="text-center pb-2 md:text-right lg:invisible">
 				<span className="text-2xl font-medium text-[#888888] md:text-xl">
 					© Copyright 2022 Wavpoint, Inc.
 				</span>
