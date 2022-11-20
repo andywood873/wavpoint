@@ -1,5 +1,12 @@
 import { Center } from "@chakra-ui/react"
-import { Box, Fab, InputAdornment, Stack, TextField } from "@mui/material"
+import {
+	Box,
+	Fab,
+	InputAdornment,
+	Stack,
+	Switch,
+	TextField,
+} from "@mui/material"
 import Image from "next/image"
 import { useState } from "react"
 import Navbar from "../components/Navbar"
@@ -18,6 +25,7 @@ export default function MediaUpload() {
 		"0x12E618dDA8A05532f5e20286f849a372220B0b60",
 	)
 	const [selectedImageFile, setSelectedImageFile] = useState(null)
+	const [selectedAudioFile, setSelectedAudioFile] = useState(null)
 	const [tracklist, setTracklist] = useState([""])
 	const [split, setSplit] = useState([{ address: "", percentage: "" }])
 	const [percentageError, setPercentageError] = useState(false)
@@ -25,7 +33,37 @@ export default function MediaUpload() {
 	const [addressError, setAddressError] = useState(false)
 	const [addressHelperText, setAddressHelperTex] = useState("")
 	const [royalty, setRoyalty] = useState(0)
-	const [author, setAuthor] = useState("")
+	const [artist, setArtist] = useState("")
+	const [description, setDescription] = useState("")
+	const [recordingLocation, setRecordingLocation] = useState("")
+	const [isPrivate, setIsPrivate] = useState(true)
+
+	const control = [
+		{
+			conditionType: "evmBasic",
+			contractAddress: input,
+			standardContractType: "ERC721",
+			chain: "ethereum",
+			method: "balanceOf",
+			parameters: [":userAddress"],
+			returnValueTest: {
+				comparator: ">=",
+				value: "1",
+			},
+		},
+	]
+
+	function handleArtistChange(event) {
+		setArtist(event.target.value)
+	}
+
+	function handleDescriptionChange(event) {
+		setDescription(event.target.value)
+	}
+
+	function handleRecordingLocationChange(event) {
+		setRecordingLocation(event.target.value)
+	}
 
 	function increaseTracks() {
 		const data = [...tracklist, ""]
@@ -36,6 +74,11 @@ export default function MediaUpload() {
 		let data = tracklist
 		data[index] = event.target.value
 		setTracklist(data)
+	}
+
+	function handlePrivacyChange(event) {
+		setIsPrivate(event.target.checked)
+		console.log(isPrivate)
 	}
 
 	function increaseSplit() {
@@ -70,24 +113,48 @@ export default function MediaUpload() {
 		}
 	}
 
-	function checkAddressValidity(data) {
+	async function checkAddressValidity(data) {
 		let isAddressValid = false
-		for (let i = 0; i < data.length; i++) {
-			if (data[i].address) {
+
+		if (data.address) {
+			try {
+				isAddressValid = ethers.utils.isAddress(data.address.toLowerCase())
+			} catch (error) {
+				console.log(error)
+			}
+			const split = data.address.split(".")
+			console.log(split)
+			console.log(split[split.length - 1])
+			let isEns = false
+			if (split[split.length - 1].toLowerCase() === "eth") {
+				isEns = true
+			}
+			if (!isAddressValid && isEns) {
 				try {
-					isAddressValid = ethers.utils.isAddress(data[i].address.toLowerCase())
+					const provider = ethers.getDefaultProvider("homestead")
+					const resolver = await provider.resolveName(
+						data.address.toLowerCase(),
+					)
+					isAddressValid = ethers.utils.isAddress(resolver.toLowerCase())
+					if (isAddressValid === undefined) {
+						isAddressValid = false
+					}
+					console.log(isAddressValid)
 				} catch (error) {
 					console.log(error)
 				}
 			}
 		}
+
 		if (isAddressValid) {
 			setAddressError(false)
 			setAddressHelperTex("")
 		} else {
 			setAddressError(true)
-			setAddressHelperTex("Input Valid Address")
+			setAddressHelperTex("One invalid Address")
+			return isAddressValid
 		}
+		return isAddressValid
 	}
 
 	function handleSplitChange(index, event) {
@@ -95,7 +162,7 @@ export default function MediaUpload() {
 		data[index][event.target.name] = event.target.value
 		setSplit(data)
 		checkTotalPercentage(data)
-		checkAddressValidity(data)
+		// checkAddressValidity(data[index])
 		console.log(split)
 	}
 
@@ -105,21 +172,94 @@ export default function MediaUpload() {
 		}
 	}
 
-	const control = [
-		{
-			conditionType: "evmBasic",
-			contractAddress: input,
-			standardContractType: "ERC721",
-			chain: "ethereum",
-			method: "balanceOf",
-			parameters: [":userAddress"],
-			returnValueTest: {
-				comparator: ">=",
-				value: "1",
-			},
-		},
-	]
-	async function encrypt() {
+	async function upload() {
+		const json = {
+			image: selectedImageFile,
+			audio: selectedAudioFile,
+			artist: artist,
+			description: description,
+			tracklist: tracklist,
+			loaction: recordingLocation,
+			royalty: royalty,
+			split: split,
+		}
+		console.log(json)
+		let isAddressValid = false
+		for (let i = 0; i < split.length; i++) {
+			console.log("Checking Address of - " + split[i].address)
+			isAddressValid = await checkAddressValidity(split[i]).then(
+				(value) => value,
+			)
+			console.log("Address validity - ")
+			console.log(isAddressValid)
+			if (isAddressValid === false) {
+				return
+			}
+		}
+
+		console.log("Checked Addresses")
+		if (isPrivate) {
+			const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
+				await encrypt(selectedAudioFile, true)
+			console.log(encryptedSymmetricKey)
+			console.log("Encrypted Audio Zip Blob ....")
+			console.log(zipBlob)
+			console.log("Encrypted Audio file!!")
+			const tracklistJsonString = JSON.stringify(tracklist)
+			console.log(tracklistJsonString)
+			const {
+				encryptedString: tracklistEncrypted,
+				encryptedSymmetricKey: encryptedSymmetricKey2,
+			} = await encrypt(tracklistJsonString,false)
+			console.log(encryptedSymmetricKey2)
+			console.log("Encrypted tracklist Zip Blob ....")
+			console.log(tracklistEncrypted)
+			console.log("Encrypted Tracklist file!!")
+
+			const audioCid = await uploadToIpfs(zipBlob,"audio")
+			const imageCid = await uploadToIpfs(selectedImageFile,"image")
+
+			const tracklistText =  await new Response(tracklistEncrypted).text()
+
+			const metadataJson = {
+				image: "ipfs://" + imageCid,
+				description: description,
+				name: "Name1",
+				animationUrl: "ipfs://" + audioCid,
+				tracklist:tracklistText,
+				location:recordingLocation,
+				encryptedSymmetricKeyForTracklist:encryptedSymmetricKey2
+			}
+			const metadataBlob = new Blob([JSON.stringify(metadataJson)])
+
+			console.log(metadataJson);
+			const metadataCid = await uploadToIpfs(metadataBlob,"metadata.json")
+			console.log(audioCid)
+			console.log(imageCid)
+			console.log(metadataCid);
+		}else{
+			const audioCid = await uploadToIpfs(selectedAudioFile,"audio")
+			const imageCid = await uploadToIpfs(selectedImageFile,"image")
+			const metadataJson = {
+				image: "ipfs://" + imageCid,
+				description: description,
+				name: "Name1",
+				animationUrl: "ipfs://" + audioCid,
+				tracklist: JSON.stringify(tracklist),
+				location:recordingLocation,
+			}
+			const metadataBlob = new Blob([JSON.stringify(metadataJson)])
+			console.log(metadataJson);
+			const metadataCid = await uploadToIpfs(metadataBlob,"metadata.json")
+			console.log(audioCid)
+			console.log(imageCid)
+			console.log(metadataCid);
+		}
+
+		
+	}
+
+	async function encrypt(selectedFile, isZip) {
 		const client = new LitJsSdk.LitNodeClient()
 		await client.connect()
 		window.litNodeClient = client
@@ -131,54 +271,80 @@ export default function MediaUpload() {
 		console.log("Authenticated MEssage:- ")
 		console.log(authSig)
 		console.log("The selected file- ")
-		console.log(selectedImageFile)
-		const { zipBlob, encryptedSymmetricKey, symmetricKey } =
-			await LitJsSdk.encryptFileAndZipWithMetadata({
-				file: selectedImageFile,
-				authSig: authSig,
+		console.log(selectedFile)
+		if (isZip) {
+			const { zipBlob, encryptedSymmetricKey, symmetricKey } =
+				await LitJsSdk.encryptFileAndZipWithMetadata({
+					file: selectedFile,
+					authSig: authSig,
+					accessControlConditions: accessControlConditions,
+					chain: chain,
+					litNodeClient: window.litNodeClient,
+					unifiedAccessControlConditions: [accessControlConditions],
+				})
+			console.log("Symmetric Key :- ")
+			console.log(symmetricKey)
+
+			console.log("Encrypted Symmetric Key:-")
+			console.log(encryptedSymmetricKey)
+
+			console.log("Enxrypted File")
+			console.log(zipBlob)
+
+			return {
+				zipBlob,
+				encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
+					encryptedSymmetricKey,
+					"base16",
+				),
+			}
+		} else {
+			const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
+				selectedFile,
+			)
+
+			const encryptedSymmetricKey = await window.litNodeClient.saveEncryptionKey({
 				accessControlConditions: accessControlConditions,
-				chain: chain,
-				litNodeClient: window.litNodeClient,
-				unifiedAccessControlConditions: [accessControlConditions],
+				symmetricKey,
+				authSig,
+				chain,
 			})
+			console.log("Symmetric Key :- ")
+			console.log(symmetricKey)
 
-		console.log("Symmetric Key :- ")
-		console.log(symmetricKey)
+			console.log("Encrypted Symmetric Key:-")
+			console.log(encryptedSymmetricKey)
 
-		console.log("Encrypted Symmetric Key:-")
-		console.log(encryptedSymmetricKey)
-		console.log("Enxrypted File")
-		console.log(zipBlob)
+			console.log("Enxrypted File")
+			console.log(encryptedString)
 
-		return {
-			zipBlob,
-			encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
-				encryptedSymmetricKey,
-				"base16",
-			),
-			accessControlConditions,
+			return {
+				encryptedString,
+				encryptedSymmetricKey: LitJsSdk.uint8arrayToString(
+					encryptedSymmetricKey,
+					"base16",
+				),
+			}
 		}
 	}
 
-	async function uploadIpfs() {
-		setLoading(true)
+	async function uploadToIpfs(zipBlob,fileName) {
+		// setLoading(true)
 		const token = process.env.NEXT_PUBLIC_WEB3_STORAGE
 		const web3Client = new Web3Storage({ token: token })
 
 		console.log("Getting Encrypted FIle and key...")
-		const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
-			await encrypt()
+		// const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
+		// await encrypt()
 		console.log("Done getting Encrypted FIle and key")
 
 		console.log("Putting files on ipfs.....")
-		const cid = await web3Client.put([new File([zipBlob], "upload.zip")])
+		const cid = await web3Client.put([new File([zipBlob], fileName)])
 
 		console.log("Uploaded to IPFS successfully. CID is :- ")
 		console.log(cid)
-		setLoading(false)
-		alert(
-			`Your Files have been encrypted with LIT and Uploaded to IPFS heres is your CID:- ${cid}`,
-		)
+		// setLoading(false)
+		return cid
 	}
 
 	return (
@@ -199,6 +365,8 @@ export default function MediaUpload() {
 											label="Artist Name"
 											variant="outlined"
 											sx={{ width: "35rem" }}
+											value={artist}
+											onChange={(event) => handleArtistChange(event)}
 										/>
 										<TextField
 											id="outlined-basic"
@@ -207,29 +375,43 @@ export default function MediaUpload() {
 											rows={5}
 											variant="outlined"
 											sx={{ width: "35rem" }}
+											value={description}
+											onChange={(event) => handleDescriptionChange(event)}
 										/>
 									</Stack>
 								</div>
 							</Box>
-							<div className="py-10 px-7 border-2 ml-10 rounded-lg w-[14.8rem] h-[14.8rem]">
+							<div className=" border-2 ml-10 rounded-lg w-[14.8rem] h-[14.8rem]">
 								<div
 									onClick={() => document.querySelector(".input_image").click()}
 								>
-									<Center className="mb-5">
-										<Image
-											src="/icon-upload.svg"
-											width={30}
-											height={30}
-											alt="upload icon"
-										></Image>
-									</Center>
+									{selectedImageFile ? (
+										<Center>
+											<img
+												className="-z-1"
+												src={URL.createObjectURL(selectedImageFile)}
+											/>
+										</Center>
+									) : (
+										<div className="py-10 px-7">
+											<Center className="mb-5">
+												<Image
+													src="/icon-upload.svg"
+													width={30}
+													height={30}
+													alt="upload icon"
+												></Image>
+											</Center>
 
-									<p className="font-medium text-center font-['DM Sans']">
-										Upload or drag & drop artwork
-									</p>
-									<p className="text-[#888888] text-center font-['DM Sans']">
-										.JPEG, .PNG or .GIF max 50 MB
-									</p>
+											<p className="font-medium text-center font-['DM Sans']">
+												Upload or drag & drop artwork
+											</p>
+											<p className="text-[#888888] text-center font-['DM Sans']">
+												.JPEG, .PNG or .GIF max 50 MB
+											</p>
+										</div>
+									)}
+
 									<input
 										className="input_image"
 										accept="image/*"
@@ -249,14 +431,15 @@ export default function MediaUpload() {
 							<div
 								className="ml-0 my-5 py-5 px-7 border-2 ml-10 rounded-lg w-[52.55rem] h-[5rem]"
 								onClick={() => document.querySelector(".input_audio").click()}
-								// onClick={() => console.log("Clicked!")}
 							>
 								<input
 									type="file"
 									accept="audio/*"
 									className="input_audio"
 									hidden
-									onChange={(e) => console.log(e)}
+									onChange={(e) => {
+										setSelectedAudioFile(e.target.files[0])
+									}}
 								/>
 								<Center>
 									<Image
@@ -271,11 +454,15 @@ export default function MediaUpload() {
 									<p className="text-[#888888] text-center font-['DM Sans'] mx-2.5">
 										.MP3 or .WAV
 									</p>
+									{selectedAudioFile ? (
+										<p className="font-medium text-center font-['DM Sans'] mx-2.5">
+											{selectedAudioFile.name}
+										</p>
+									) : null}
 								</Center>
 							</div>
 						</div>
 
-						{/* <Tracklist setTracklist={setTracklist} tracklist={tracklist} /> */}
 						<Stack>
 							<h2>Tracklist</h2>
 							{tracklist.map((item, index) => {
@@ -316,6 +503,8 @@ export default function MediaUpload() {
 								}}
 								sx={{ width: "35rem" }}
 								className="mr-10"
+								value={recordingLocation}
+								onChange={(event) => handleRecordingLocationChange(event)}
 							/>
 							<TextField
 								label="Royalty"
@@ -332,7 +521,17 @@ export default function MediaUpload() {
 								sx={{ width: "15rem" }}
 							/>
 						</div>
-						<div className="my-20">
+						<div className="flex my-10 float-right inline-block items-center">
+							<span className="mx-5">
+								Audio and Tracklist accesible only by collection holders?
+							</span>
+							<Switch
+								checked={isPrivate}
+								onChange={handlePrivacyChange}
+								inputProps={{ "aria-label": "controlled" }}
+							/>
+						</div>
+						<div className="my-36">
 							<h2 className="text-3xl font-medium my-10">Splits</h2>
 
 							<Stack>
@@ -373,11 +572,10 @@ export default function MediaUpload() {
 									)
 								})}
 							</Stack>
-							<p
-								className="font-medium my-10 text-right cursor-pointer"
-								onClick={increaseSplit}
-							>
-								Add more+
+							<p className="font-medium my-10 text-right ">
+								<span className="cursor-pointer" onClick={increaseSplit}>
+									Add more+
+								</span>
 							</p>
 							<button
 								className="border-4 float-right  rounded-md border-[#222222] px-20 py-4 font-medium text-xl"
@@ -386,16 +584,16 @@ export default function MediaUpload() {
 								Split Evenly
 							</button>
 						</div>
+
 						<div className="border-t-4 my-44 py-20">
 							<div className="float-right">
 								<div className="flex ">
 									<button className="rounded-md border-[#222222] px-20 py-4 font-medium text-xl">
-										{" "}
 										Cancel
 									</button>
 									<button
 										className="rounded-md border-[#222222] px-20 py-4 font-medium text-xl text-white bg-black"
-										onClick={uploadIpfs}
+										onClick={upload}
 									>
 										Upload
 									</button>
