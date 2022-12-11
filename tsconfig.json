@@ -22,7 +22,8 @@
 		"pages/index.js",
 		"components/BiconomyContext.tsx",
 		"components/scw1.tsx",
-		"components/Connect.tsx"
+		"components/Connect.tsx",
+		"components/UploadSite.jsx"
 	],
 	"exclude": ["node_modules"]
 }
