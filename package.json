@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@0xsplits/splits-sdk": "^2.3.0",
+    "@biconomy/core-types": "^0.0.4",
+    "@biconomy/smart-account": "^0.0.2",
+    "@biconomy/web3-auth": "^0.0.4",
     "@chakra-ui/react": "^2.3.6",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
@@ -16,6 +20,7 @@
     "@magic-ext/connect": "^3.1.0",
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.14",
+    "@web3auth/ui": "^4.1.0-alpha.0",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "framer-motion": "^6",

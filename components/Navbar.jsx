@@ -1,7 +1,7 @@
 import Link from "next/link"
-import ConnectButton from "./Connect"
+import ConnectBtn from "./Connect";
 
-export default function Navbar() {
+export default function Navbar(props) {
 	return (
 		<>
 			<div className="absolute top-10 left-10 md:top-8 md:left-10 lg:left-8 lg:top-6">
@@ -17,7 +17,20 @@ export default function Navbar() {
 						Deploy Drop
 					</h2>
 				</Link>
-				<ConnectButton />
+				<ConnectBtn account={props.account} connectWeb3={props.connectWeb3} disconnectWeb3={props.disconnectWeb3}/>
+				{/* <SocialLoginDynamic/> */}
+				{/* <ConnectButton
+					onClickFunc={
+						!address
+							? connect
+							: () => {
+									setSelectedAccount(null)
+									disconnect()
+							  }
+					}
+					title={!address ? "Connect" : "Disconnect"}
+					isLoading={eoaLoading}
+				/> */}
 			</div>
 		</>
 	)

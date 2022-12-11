@@ -10,13 +10,13 @@ import {
 import Image from "next/image"
 import { useState } from "react"
 import Navbar from "../components/Navbar"
-import Footer from "../components/Footer"
 import { Web3Storage } from "web3.storage"
 import LitJsSdk from "@lit-protocol/sdk-browser"
 import { ethers } from "ethers"
-import Tracklist from "../components/Tracklist"
 import AddIcon from "@mui/icons-material/Add"
 import MediaFooter from "../components/MediaFooter"
+import { SplitsClient } from '@0xsplits/splits-sdk'
+
 
 export default function MediaUpload() {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
@@ -162,7 +162,6 @@ export default function MediaUpload() {
 		data[index][event.target.name] = event.target.value
 		setSplit(data)
 		checkTotalPercentage(data)
-		// checkAddressValidity(data[index])
 		console.log(split)
 	}
 
@@ -255,7 +254,9 @@ export default function MediaUpload() {
 			console.log(imageCid)
 			console.log(metadataCid);
 		}
+	}
 
+	async function createSplit() {
 		
 	}
 

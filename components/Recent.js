@@ -1,5 +1,4 @@
 import { Center } from "@chakra-ui/react"
-import { Button } from "@mui/material"
 import Card from "./Card"
 
 export default function Recent() {
