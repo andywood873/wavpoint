@@ -30,7 +30,7 @@ const UploadBody = () => {
 			return socialLoginSDK
 		}
 		const sdk = new SocialLogin()
-		await sdk.init(ethers.utils.hexValue(80001))
+		await sdk.init(ethers.utils.hexValue(5))
 		setSocialLoginSDK(sdk)
 		sdk.showConnectModal()
 		sdk.showWallet()
@@ -79,6 +79,14 @@ const UploadBody = () => {
 			const smartAccount = new SmartAccount(provider, {
 				activeNetworkId: ChainId.GOERLI,
 				supportedNetworksIds: [ChainId.GOERLI],
+				networkConfig: [
+					{
+					chainId: ChainId.GOERLI,
+					dappAPIKey: process.env.NEXT_PUBLIC_BICONOMY_GOERLI,
+					// check in the beginning of the page to play around with testnet common keys
+					// customPaymasterAPI: <IPaymaster Instance of your own Paymaster>
+				  }
+				]
 			})
 			await smartAccount.init()
 			const context = smartAccount.getSmartAccountContext()
@@ -94,7 +102,7 @@ const UploadBody = () => {
 
 	return (
 		<div>
-			<UploadSite account={account} connectWeb3={connectWeb3} disconnectWeb3={disconnectWeb3}/>
+			<UploadSite provider={provider} account={account} connectWeb3={connectWeb3} disconnectWeb3={disconnectWeb3} smartAccount={smartAccount}/>
 		</div>
 	)
 }

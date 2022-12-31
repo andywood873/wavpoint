@@ -235,6 +235,7 @@ export default function UploadSite(props) {
 			console.log(audioCid)
 			console.log(imageCid)
 			console.log(metadataCid)
+			createSplit()
 		} else {
 			const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
 			const imageCid = await uploadToIpfs(selectedImageFile, "image")
@@ -252,10 +253,121 @@ export default function UploadSite(props) {
 			console.log(audioCid)
 			console.log(imageCid)
 			console.log(metadataCid)
+			createSplit()
 		}
 	}
 
-	async function createSplit() {}
+	async function createSplit() {
+		console.log("Starting SPlit creatio.....")
+		if (props.provider) {
+			console.log("Provider is true")
+			const provider = props.provider
+			console.log(provider)
+			const signer = provider.getSigner()
+			console.log("Got signer...")
+			console.log(signer)
+			// const walletProvider = new ethers.providers.Web3Provider(provider)
+			// console.log(walletProvider)
+			// const splitsClient = new SplitsClient({
+			// 	chainId: 80001,
+			// 	provider: provider, // ethers provider (optional, required if using any of the SplitMain functions)
+			// 	signer: signer, // ethers signer (optional, required if using the SplitMain write functions)
+			// })
+			console.log("initialised Splits Client")
+			// const args = {
+			// 	recipients: [
+			// 		{
+			// 			address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+			// 			percentAllocation: 50.0,
+			// 		},
+			// 		{
+			// 			address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
+			// 			percentAllocation: 50.0,
+			// 		},
+			// 	],
+			// 	distributorFeePercent: 1.0,
+			// 	controller: "0xEc8Bfc8637247cEe680444BA1E25fA5e151Ba342",
+			// }
+			try {
+				// const response = await splitsClient.createSplit(args)
+				const splitInterface = new ethers.utils.Interface([
+					"function createSplit(address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
+				])
+				console.log(props.smartAccount.address)
+				
+				// const addressList = [
+					// 	"0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+					// 	"0x0000000000000000000000000000000000000001",
+					// 	"0x000000000000000000000000000000000000000a",
+					// 	"0x0000000000000000000000000000000000000005",
+					// ]
+				let addressList = []
+				console.log("Came till split address")
+				split.forEach((i) => {
+					addressList.push(i.address)
+				})
+				addressList.sort()
+				console.log("Passed address")
+				console.log(addressList)
+				const percentAllocation = [500000, 500000]
+				const distributorFee = 20000
+				const controller = "0xB721347D2938a5594a12DF5Cc36D598b839Cb98f"
+				const data = splitInterface.encodeFunctionData("createSplit", [
+					addressList,
+					percentAllocation,
+					distributorFee,
+					controller,
+				])
+				const tx1 = {
+					to: "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE",
+					data: data,
+				}
+				const txs = []
+				txs.push(tx1)
+
+				const feeQuotes = await props.smartAccount.prepareRefundTransactionBatch({
+					transactions: txs,
+				})
+				console.log("Fee quotes-----");
+				console.log(feeQuotes);
+				const transaction = await props.smartAccount.createRefundTransactionBatch({
+					transactions: txs,
+					feeQuote: feeQuotes[0],
+					
+				  });
+				console.log("Created Transaction");
+				console.log(transaction)
+				let gasLimit = {
+					hex: "0x1E8480",
+					type: "hex",
+				  };
+				props.smartAccount.on("txHashGenerated",(res) => {
+					console.log("Generated txHash:- ")
+					console.log(res.hash);
+				})
+				props.smartAccount.on("txMined",(res) => {
+					console.log("Tx Mined:- ")
+					console.log(res.hash);
+				})
+				console.log("Sedning to replayer")
+				const txHash = await props.smartAccount.sendTransaction({
+					tx: transaction,
+					// gasLimit
+				});
+				
+				console.log("Transaction Hash")
+				console.log(txHash);
+				console.log("Transaction log");
+				console.log(transaction)
+				//   await tx
+			} catch (error) {
+				console.warn("Rejected transaction or someting happended")
+				console.log(error)
+			}
+		} else {
+			console.log("Connect Wallet Come on guys")
+		}
+	}
 
 	async function encrypt(selectedFile, isZip) {
 		const client = new LitJsSdk.LitNodeClient()
@@ -345,10 +457,15 @@ export default function UploadSite(props) {
 		// setLoading(false)
 		return cid
 	}
-
+	// console.log(props.smartAccount.address)
+	// console.log(1e6);
 	return (
 		<div>
-			<Navbar account={props.account} connectWeb3={props.connectWeb3} disconnectWeb3={props.disconnectWeb3}/>
+			<Navbar
+				account={props.account}
+				connectWeb3={props.connectWeb3}
+				disconnectWeb3={props.disconnectWeb3}
+			/>
 			<div className="relative top-48 px-1/2 min-w-full">
 				<Center>
 					<div>
@@ -386,7 +503,7 @@ export default function UploadSite(props) {
 								>
 									{selectedImageFile ? (
 										<Center>
-											<Image
+											<img
 												className="-z-1"
 												src={URL.createObjectURL(selectedImageFile)}
 												alt={"image preview"}

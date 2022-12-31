@@ -21,11 +21,12 @@
     ethers "^5.5.2"
     js-base64 "^3.7.2"
 
-"@0xsplits/splits-sdk@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@0xsplits/splits-sdk/-/splits-sdk-2.3.0.tgz#6a27b84104cf82ce6ffea1760a36b00e1e548d56"
-  integrity sha512-6SxTgv2PstXGkssqOBbHc/jR+PAjsmBbw/uv/9fN9GJVAlx6UyTH26p1zMgnPjig6ovO9MAgcBu9DaQDpdlR2A==
+"@0xsplits/splits-sdk@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@0xsplits/splits-sdk/-/splits-sdk-2.4.0.tgz#762a25253c68c537372f689df60db5a9c10e305a"
+  integrity sha512-RWs7FZh4zivC7pZmfUXiWwjEVVgB1UJ7BBEvkkCHNApLd5l36IshTEYpGSf4iu1Kzkulkk5ClU3e2YjLm8t7Pw==
   dependencies:
+    abi-coder "^4.1.1"
     base-64 "^1.0.0"
     ethers "^5.6.9"
     graphql "^16.5.0"
@@ -1334,7 +1335,7 @@
     async "^3.2.4"
     ethereum-cryptography "^1.1.2"
 
-"@ethersproject/abi@5.7.0", "@ethersproject/abi@^5.0.0-beta.146", "@ethersproject/abi@^5.1.2", "@ethersproject/abi@^5.4.0", "@ethersproject/abi@^5.6.3", "@ethersproject/abi@^5.7.0":
+"@ethersproject/abi@5.7.0", "@ethersproject/abi@^5.0.0", "@ethersproject/abi@^5.0.0-beta.146", "@ethersproject/abi@^5.1.2", "@ethersproject/abi@^5.4.0", "@ethersproject/abi@^5.6.3", "@ethersproject/abi@^5.7.0":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/abi/-/abi-5.7.0.tgz#b3f3e045bbbeed1af3947335c247ad625a44e449"
   integrity sha512-351ktp42TiRcYB3H1OP8yajPeAQstMW/yCFokj/AthP9bLHzQFPlOrxOcwYEDkUAICmOHljvN4K39OMTMUa9RA==
@@ -1490,7 +1491,7 @@
     aes-js "3.0.0"
     scrypt-js "3.0.1"
 
-"@ethersproject/keccak256@5.7.0", "@ethersproject/keccak256@^5.7.0":
+"@ethersproject/keccak256@5.7.0", "@ethersproject/keccak256@^5.0.0", "@ethersproject/keccak256@^5.7.0":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/keccak256/-/keccak256-5.7.0.tgz#3186350c6e1cd6aba7940384ec7d6d9db01f335a"
   integrity sha512-2UcPboeL/iW+pSg6vZ6ydF8tCnv3Iu/8tUmLLzWWGzxWKFFqOBQFLo6uLUv6BDrLgCDfN28RJ/wtByx+jZ4KBg==
@@ -1600,7 +1601,7 @@
     "@ethersproject/sha2" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@ethersproject/strings@5.7.0", "@ethersproject/strings@^5.5.0", "@ethersproject/strings@^5.7.0":
+"@ethersproject/strings@5.7.0", "@ethersproject/strings@^5.0.0", "@ethersproject/strings@^5.5.0", "@ethersproject/strings@^5.7.0":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/strings/-/strings-5.7.0.tgz#54c9d2a7c57ae8f1205c88a9d3a56471e14d5ed2"
   integrity sha512-/9nu+lj0YswRNSH0NXYqrh8775XNyEdUQAuf3f+SmOrnVewcJ5SBNAjF7lpgehKi4abvNNXyf+HX86czCdJ8Mg==
@@ -3689,6 +3690,15 @@ abbrev@1.0.x:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.0.9.tgz#91b4792588a7738c25f35dd6f63752a2f8776135"
   integrity sha512-LEyx4aLEC3x6T0UguF6YILf+ntvmOaWsVfENmIW0E9H09vKlLDGelMjjSm0jkDHALj8A8quZ/HapKNigzwge+Q==
+
+abi-coder@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/abi-coder/-/abi-coder-4.1.1.tgz#b76f80cd2a71e7df368e07aea97efe50d111622a"
+  integrity sha512-CVEKpbWSIrb6JxLPsAuXrrtL8ml2MnEEcINgxOp7gR2u4GUFEKO4e0raAD1+c6UdFJ2QtX2NRoYol9k1B3TxHw==
+  dependencies:
+    "@ethersproject/abi" "^5.0.0"
+    "@ethersproject/keccak256" "^5.0.0"
+    "@ethersproject/strings" "^5.0.0"
 
 abort-controller@^3.0.0:
   version "3.0.0"
