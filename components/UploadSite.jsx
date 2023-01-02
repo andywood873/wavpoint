@@ -660,6 +660,8 @@ export default function UploadSite(props) {
 				account={props.account}
 				connectWeb3={props.connectWeb3}
 				disconnectWeb3={props.disconnectWeb3}
+				smartAccount={props.smartAccount} 
+				socialLoginSDK={props.socialLoginSDK}
 			/>
 			<div className="relative top-48 px-1/2 min-w-full">
 				<Center>

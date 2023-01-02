@@ -102,7 +102,7 @@ const UploadBody = () => {
 
 	return (
 		<div>
-			<UploadSite provider={provider} account={account} connectWeb3={connectWeb3} disconnectWeb3={disconnectWeb3} smartAccount={smartAccount}/>
+			<UploadSite provider={provider} account={account} connectWeb3={connectWeb3} disconnectWeb3={disconnectWeb3} smartAccount={smartAccount} socialLoginSDK={socialLoginSDK}/>
 		</div>
 	)
 }

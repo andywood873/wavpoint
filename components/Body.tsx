@@ -35,7 +35,7 @@ const Body = () => {
 			return socialLoginSDK
 		}
 		const sdk = new SocialLogin()
-		await sdk.init(ethers.utils.hexValue(80001))
+		await sdk.init(ethers.utils.hexValue(5))
 		setSocialLoginSDK(sdk)
 		sdk.showConnectModal()
 		sdk.showWallet()
@@ -100,7 +100,7 @@ const Body = () => {
 	return (
 		<div className="divide-y-8">
 			<div>
-				<Header account={account} connectWeb3={connectWeb3} disconnectWeb3={disconnectWeb3}/>
+				<Header account={account} connectWeb3={connectWeb3} disconnectWeb3={disconnectWeb3} smartAccount={smartAccount} socialLoginSDK={socialLoginSDK}/>
 				<Popular />
 				<Recent />
 				<LowerPanel />

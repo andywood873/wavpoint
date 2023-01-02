@@ -1,6 +1,6 @@
 import Link from "next/link"
 import ConnectBtn from "./Connect";
-
+import AddFundsButton from "./AddFundsButton"
 export default function Navbar(props) {
 	return (
 		<>
@@ -18,20 +18,9 @@ export default function Navbar(props) {
 					</h2>
 				</Link>
 				<ConnectBtn account={props.account} connectWeb3={props.connectWeb3} disconnectWeb3={props.disconnectWeb3}/>
-				{/* <SocialLoginDynamic/> */}
-				{/* <ConnectButton
-					onClickFunc={
-						!address
-							? connect
-							: () => {
-									setSelectedAccount(null)
-									disconnect()
-							  }
-					}
-					title={!address ? "Connect" : "Disconnect"}
-					isLoading={eoaLoading}
-				/> */}
+				
 			</div>
+				{props.smartAccount.address && props.account? <AddFundsButton socialLoginSDK={props.socialLoginSDK} smartAccount={props.smartAccount}/>: null}
 		</>
 	)
 }

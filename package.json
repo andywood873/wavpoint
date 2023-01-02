@@ -12,6 +12,7 @@
     "@0xsplits/splits-sdk": "^2.4.0",
     "@biconomy/core-types": "^0.0.4",
     "@biconomy/smart-account": "^0.0.2",
+    "@biconomy/transak": "^0.0.4",
     "@biconomy/web3-auth": "^0.0.4",
     "@chakra-ui/react": "^2.3.6",
     "@emotion/react": "^11",
