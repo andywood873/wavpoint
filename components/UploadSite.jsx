@@ -16,6 +16,8 @@ import { ethers } from "ethers"
 import AddIcon from "@mui/icons-material/Add"
 import MediaFooter from "./MediaFooter"
 import { SplitsClient } from "@0xsplits/splits-sdk"
+import { resolve } from "styled-jsx/css"
+import { ETHEREUM_CHAIN_IDS } from "@0xsplits/splits-sdk/dist/constants"
 
 export default function UploadSite(props) {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
@@ -36,6 +38,12 @@ export default function UploadSite(props) {
 	const [description, setDescription] = useState("")
 	const [recordingLocation, setRecordingLocation] = useState("")
 	const [isPrivate, setIsPrivate] = useState(true)
+	const [splitCreated, setSplitCreated] = useState(false)
+	const [splitAddress, setSplitAddress] = useState("")
+	const [zoraDropCreated, setZoraDropCreated] = useState(false)
+	const [zoraDropAddress, setZoraDropAddress] = useState("")
+	const [imageIpfs, setImageIpfs] = useState("")
+	const [audioIpfs, setAudioIpfs] = useState("")
 
 	const control = [
 		{
@@ -196,177 +204,364 @@ export default function UploadSite(props) {
 		}
 
 		console.log("Checked Addresses")
-		if (isPrivate) {
-			const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
-				await encrypt(selectedAudioFile, true)
-			console.log(encryptedSymmetricKey)
-			console.log("Encrypted Audio Zip Blob ....")
-			console.log(zipBlob)
-			console.log("Encrypted Audio file!!")
-			const tracklistJsonString = JSON.stringify(tracklist)
-			console.log(tracklistJsonString)
-			const {
-				encryptedString: tracklistEncrypted,
-				encryptedSymmetricKey: encryptedSymmetricKey2,
-			} = await encrypt(tracklistJsonString, false)
-			console.log(encryptedSymmetricKey2)
-			console.log("Encrypted tracklist Zip Blob ....")
-			console.log(tracklistEncrypted)
-			console.log("Encrypted Tracklist file!!")
+		if (!(imageIpfs && audioIpfs)) {
+			if (isPrivate) {
+				const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
+					await encrypt(selectedAudioFile, true)
+				console.log(encryptedSymmetricKey)
+				console.log("Encrypted Audio Zip Blob ....")
+				console.log(zipBlob)
+				console.log("Encrypted Audio file!!")
+				const tracklistJsonString = JSON.stringify(tracklist)
+				console.log(tracklistJsonString)
+				const {
+					encryptedString: tracklistEncrypted,
+					encryptedSymmetricKey: encryptedSymmetricKey2,
+				} = await encrypt(tracklistJsonString, false)
+				console.log(encryptedSymmetricKey2)
+				console.log("Encrypted tracklist Zip Blob ....")
+				console.log(tracklistEncrypted)
+				console.log("Encrypted Tracklist file!!")
 
-			const audioCid = await uploadToIpfs(zipBlob, "audio")
-			const imageCid = await uploadToIpfs(selectedImageFile, "image")
+				const audioCid = await uploadToIpfs(zipBlob, "audio")
+				const imageCid = await uploadToIpfs(selectedImageFile, "image")
 
-			const tracklistText = await new Response(tracklistEncrypted).text()
+				const tracklistText = await new Response(tracklistEncrypted).text()
 
-			const metadataJson = {
-				image: "ipfs://" + imageCid,
-				description: description,
-				name: "Name1",
-				animationUrl: "ipfs://" + audioCid,
-				tracklist: tracklistText,
-				location: recordingLocation,
-				encryptedSymmetricKeyForTracklist: encryptedSymmetricKey2,
+				const metadataJson = {
+					image: "ipfs://" + imageCid,
+					description: description,
+					name: "Name1",
+					animationUrl: "ipfs://" + audioCid,
+					tracklist: tracklistText,
+					location: recordingLocation,
+					encryptedSymmetricKeyForTracklist: encryptedSymmetricKey2,
+				}
+				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
+
+				console.log(metadataJson)
+				const metadataCid = await uploadToIpfs(metadataBlob, "metadata.json")
+				console.log(audioCid)
+				setAudioIpfs(audioCid)
+				console.log(imageCid)
+				setImageIpfs(imageCid)
+				console.log(metadataCid)
+				createSplit()
+				dropZoraNft()
+			} else {
+				const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
+				const imageCid = await uploadToIpfs(selectedImageFile, "image")
+				const metadataJson = {
+					image: "ipfs://" + imageCid,
+					description: description,
+					name: "Name1",
+					animationUrl: "ipfs://" + audioCid,
+					tracklist: JSON.stringify(tracklist),
+					location: recordingLocation,
+				}
+				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
+				console.log(metadataJson)
+				const metadataCid = await uploadToIpfs(metadataBlob, "metadata.json")
+				console.log(audioCid)
+				setAudioIpfs(audioCid)
+				console.log(imageCid)
+				setImageIpfs(imageCid)
+				console.log(metadataCid)
+				createSplit().then(async () => {
+					await dropZoraNft()
+				})
 			}
-			const metadataBlob = new Blob([JSON.stringify(metadataJson)])
-
-			console.log(metadataJson)
-			const metadataCid = await uploadToIpfs(metadataBlob, "metadata.json")
-			console.log(audioCid)
-			console.log(imageCid)
-			console.log(metadataCid)
-			createSplit()
 		} else {
-			const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
-			const imageCid = await uploadToIpfs(selectedImageFile, "image")
-			const metadataJson = {
-				image: "ipfs://" + imageCid,
-				description: description,
-				name: "Name1",
-				animationUrl: "ipfs://" + audioCid,
-				tracklist: JSON.stringify(tracklist),
-				location: recordingLocation,
-			}
-			const metadataBlob = new Blob([JSON.stringify(metadataJson)])
-			console.log(metadataJson)
-			const metadataCid = await uploadToIpfs(metadataBlob, "metadata.json")
-			console.log(audioCid)
-			console.log(imageCid)
-			console.log(metadataCid)
-			createSplit()
+			createSplit().then(async () => {
+				await dropZoraNft()
+			})
 		}
 	}
 
-	async function createSplit() {
-		console.log("Starting SPlit creatio.....")
-		if (props.provider) {
-			console.log("Provider is true")
-			const provider = props.provider
-			console.log(provider)
-			const signer = provider.getSigner()
-			console.log("Got signer...")
-			console.log(signer)
-			// const walletProvider = new ethers.providers.Web3Provider(provider)
-			// console.log(walletProvider)
-			// const splitsClient = new SplitsClient({
-			// 	chainId: 80001,
-			// 	provider: provider, // ethers provider (optional, required if using any of the SplitMain functions)
-			// 	signer: signer, // ethers signer (optional, required if using the SplitMain write functions)
-			// })
-			console.log("initialised Splits Client")
-			// const args = {
-			// 	recipients: [
-			// 		{
-			// 			address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-			// 			percentAllocation: 50.0,
-			// 		},
-			// 		{
-			// 			address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
-			// 			percentAllocation: 50.0,
-			// 		},
-			// 	],
-			// 	distributorFeePercent: 1.0,
-			// 	controller: "0xEc8Bfc8637247cEe680444BA1E25fA5e151Ba342",
-			// }
+	async function dropZoraNft() {
+		console.log("Starting Zora NFT drop....")
+		if (splitCreated) {
+			// const date = new Date()
 			try {
-				// const response = await splitsClient.createSplit(args)
-				const splitInterface = new ethers.utils.Interface([
-					"function createSplit(address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
+				const saleConfiguration = {
+					publicSaleStart: Date.now(),
+					publicSaleEnd: Date.now(),
+					presaleStart: Date.now(),
+					presaleEnd: Date.now(),
+					publicSalePrice: ethers.utils.parseEther("0.000001"),
+					maxSalePurchasePerAddress: 200,
+					presaleMerkleRoot:
+						"0x0000000000000000000000000000000000000000000000000000000000000000",
+				}
+				const saleConfigurationEncoded = ethers.utils.AbiCoder.prototype.encode(
+					[
+						"uint64",
+						"uint64",
+						"uint64",
+						"uint64",
+						"uint104",
+						"uint32",
+						"bytes32",
+					],
+					[
+						Date.now(),
+						Date.now(),
+						Date.now(),
+						Date.now(),
+						ethers.utils.parseEther("0.000001").toNumber(),
+						200,
+						"0x0000000000000000000000000000000000000000000000000000000000000000",
+					],
+				)
+				console.log("Sales Configs set.....")
+				const name = "WAVTHEORY01"
+				const symbol = "WAV01"
+				const defaultAdmin = props.smartAccount.address
+				const editionSize = 200
+				const royaltyBps = royalty
+				const fundsRecipient = splitAddress
+				const nftDescription = description
+				const animationUrl = audioIpfs
+				const imageUrl = imageIpfs
+				console.log("Inputs Set....")
+				const zoraDropInterface = new ethers.utils.Interface([
+					"event CreatedDrop(address indexed creator, address indexed editionContractAddress, uint256 editionSize)",
+					"function createEdition(string name, string symbol, uint64 editionSize, uint16 royaltyBPS, address fundsRecipient, address defaultAdmin, tuple(uint104 publicSalePrice, uint32 maxSalePurchasePerAddress, uint64 publicSaleStart, uint64 publicSaleEnd, uint64 presaleStart, uint64 presaleEnd, bytes32 presaleMerkleRoot) saleConfig, string description, string animationURI, string imageURI)",
 				])
-				console.log(props.smartAccount.address)
-				
-				// const addressList = [
-					// 	"0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-					// 	"0x0000000000000000000000000000000000000001",
-					// 	"0x000000000000000000000000000000000000000a",
-					// 	"0x0000000000000000000000000000000000000005",
-					// ]
-				let addressList = []
-				console.log("Came till split address")
-				split.forEach((i) => {
-					addressList.push(i.address)
-				})
-				addressList.sort()
-				console.log("Passed address")
-				console.log(addressList)
-				const percentAllocation = [500000, 500000]
-				const distributorFee = 20000
-				const controller = "0xB721347D2938a5594a12DF5Cc36D598b839Cb98f"
-				const data = splitInterface.encodeFunctionData("createSplit", [
-					addressList,
-					percentAllocation,
-					distributorFee,
-					controller,
+				console.log("Zora Interface set....")
+				const data = zoraDropInterface.encodeFunctionData("createEdition", [
+					name,
+					symbol,
+					editionSize,
+					royaltyBps,
+					fundsRecipient,
+					defaultAdmin,
+					saleConfiguration,
+					nftDescription,
+					animationUrl,
+					imageUrl,
 				])
+				console.log("Smart contract address")
+				console.log(props.smartAccount.address);
+				console.log("Encoded data")
+				console.log(data)
 				const tx1 = {
-					to: "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE",
+					to: "0xEf440fbD719cC5c3dDCD33b6f9986Ab3702E97A5",
 					data: data,
 				}
 				const txs = []
 				txs.push(tx1)
-
-				const feeQuotes = await props.smartAccount.prepareRefundTransactionBatch({
-					transactions: txs,
-				})
-				console.log("Fee quotes-----");
-				console.log(feeQuotes);
-				const transaction = await props.smartAccount.createRefundTransactionBatch({
-					transactions: txs,
-					feeQuote: feeQuotes[0],
-					
-				  });
-				console.log("Created Transaction");
+				console.log("Transactions")
+				console.log(txs)
+				const feeQuotes =
+					await props.smartAccount.prepareRefundTransactionBatch({
+						transactions: txs,
+					})
+				console.log("Fee quotes-----")
+				console.log(feeQuotes)
+				const transaction =
+					await props.smartAccount.createRefundTransactionBatch({
+						transactions: txs,
+						feeQuote: feeQuotes[0],
+					})
+				console.log("Created Transaction")
 				console.log(transaction)
 				let gasLimit = {
 					hex: "0x1E8480",
 					type: "hex",
-				  };
-				props.smartAccount.on("txHashGenerated",(res) => {
+				}
+
+				props.smartAccount.on("txHashGenerated", (res) => {
 					console.log("Generated txHash:- ")
-					console.log(res.hash);
+					console.log(res.hash)
 				})
-				props.smartAccount.on("txMined",(res) => {
+
+				props.smartAccount.on("txMined", (res) => {
 					console.log("Tx Mined:- ")
-					console.log(res.hash);
+					console.log(res.hash)
+					console.log(res)
+					const events = res.receipt.logs.map((log) => {
+						// if (log.topics[0] === createEventTopic) {
+						// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
+						// }
+						try {
+							return zoraDropInterface.decodeEventLog(
+								"CreatedDrop",
+								log.data,
+								log.topics,
+							)
+						} catch (error) {
+							return
+						}
+						return
+					})
+					console.log(events)
+					let zoraDrop
+					events.forEach((e) => {
+						if (e !== undefined) {
+							setZoraDropCreated(true)
+							zoraDrop = e
+							setZoraDropAddress(e)
+						}
+					})
+					console.log(zoraDrop)
+					console.log(zoraDropAddress)
 				})
-				console.log("Sedning to replayer")
+				console.log("Sending to relayer")
 				const txHash = await props.smartAccount.sendTransaction({
 					tx: transaction,
-					// gasLimit
-				});
-				
+					gasLimit,
+				})
+
 				console.log("Transaction Hash")
-				console.log(txHash);
-				console.log("Transaction log");
+				console.log(txHash)
+				console.log("Transaction log")
 				console.log(transaction)
-				//   await tx
 			} catch (error) {
-				console.warn("Rejected transaction or someting happended")
+				console.error("Something went wrong")
 				console.log(error)
 			}
 		} else {
-			console.log("Connect Wallet Come on guys")
+			console.log("Split Not created or Smart Account not connected!!!")
 		}
+	}
+
+	function createSplit() {
+		console.log("Starting SPlit creation.....")
+		return new Promise(async (resolve, reject) => {
+			if (props.provider) {
+				if (!splitAddress) {
+					console.log("Provider is true")
+					// const provider = props.provider
+					// console.log(provider)
+					// const signer = provider.getSigner()
+					console.log("Got signer...")
+					// console.log(signer)
+
+					console.log("initialised Splits Client")
+
+					try {
+						const splitInterface = new ethers.utils.Interface([
+							"function createSplit(address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
+							"event CreateSplit(address indexed split)",
+						])
+						console.log(props.smartAccount.address)
+						let addressList = []
+						console.log("Came till split address")
+
+						console.log("Passed address")
+						split.sort(function (a, b) {
+							return a.address - b.address
+						})
+						console.log("Split Sorted! ....")
+						console.log(split)
+						let percentAllocation = []
+						split.forEach((i) => {
+							addressList.push(i.address)
+							percentAllocation.push(parseInt(i.percentage) * 1e4)
+						})
+						console.log("Address List-  ")
+						console.log(addressList)
+						console.log("Percentage")
+						console.log(percentAllocation)
+
+						const distributorFee = 20000
+						const controller = "0xB721347D2938a5594a12DF5Cc36D598b839Cb98f"
+						const data = splitInterface.encodeFunctionData("createSplit", [
+							addressList,
+							percentAllocation,
+							distributorFee,
+							controller,
+						])
+						const tx1 = {
+							to: "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE",
+							data: data,
+						}
+						const txs = []
+						txs.push(tx1)
+
+						const feeQuotes =
+							await props.smartAccount.prepareRefundTransactionBatch({
+								transactions: txs,
+							})
+						console.log("Fee quotes-----")
+						console.log(feeQuotes)
+						const transaction =
+							await props.smartAccount.createRefundTransactionBatch({
+								transactions: txs,
+								feeQuote: feeQuotes[0],
+							})
+						console.log("Created Transaction")
+						console.log(transaction)
+						let gasLimit = {
+							hex: "0x1E8480",
+							type: "hex",
+						}
+						const createEventTopic = splitInterface.getEventTopic("CreateSplit")
+						props.smartAccount.on("txHashGenerated", (res) => {
+							console.log("Generated txHash:- ")
+							console.log(res.hash)
+						})
+						let address
+						props.smartAccount.on("txMined", (res) => {
+							console.log("Tx Mined:- ")
+							console.log(res.hash)
+							console.log(res)
+							// const tx = props.provider.getTransactionReceipt(res.hash)
+							// console.log("Transaction- ")
+							// console.log(tx)
+							console.log("Event topic -----")
+							console.log(createEventTopic)
+							const events = res.receipt.logs.map((log) => {
+								// if (log.topics[0] === createEventTopic) {
+								// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
+								// }
+								try {
+									return splitInterface.decodeEventLog(
+										"CreateSplit",
+										log.data,
+										log.topics,
+									)
+								} catch (error) {
+									return
+								}
+								return
+							})
+							console.log(events)
+							events.forEach((e) => {
+								if (e !== undefined) {
+									address = e.split
+								}
+								console.log("Address")
+								console.log(address)
+								setSplitAddress(address)
+								setSplitCreated(true)
+								resolve("Resolved Successfully")
+							})
+						})
+						console.log("Sending to relayer")
+						const txHash = await props.smartAccount.sendTransaction({
+							tx: transaction,
+							gasLimit,
+						})
+
+						console.log("Transaction Hash")
+						console.log(txHash)
+						console.log("Transaction log")
+						console.log(transaction)
+						//   await tx
+					} catch (error) {
+						console.warn("Rejected transaction or someting happended")
+						console.log(error)
+					}
+				} else if (splitAddress) {
+					resolve("Have split address already")
+				}
+			} else {
+				console.log("Connect Wallet Come on guys")
+				reject("Some error")
+			}
+		})
 	}
 
 	async function encrypt(selectedFile, isZip) {
