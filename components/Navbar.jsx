@@ -1,7 +1,7 @@
 import Link from "next/link"
-import ConnectButton from "./Connect"
-
-export default function Navbar() {
+import ConnectBtn from "./Connect";
+import AddFundsButton from "./AddFundsButton"
+export default function Navbar(props) {
 	return (
 		<>
 			<div className="absolute top-10 left-10 md:top-8 md:left-10 lg:left-8 lg:top-6">
@@ -17,8 +17,10 @@ export default function Navbar() {
 						Deploy Drop
 					</h2>
 				</Link>
-				<ConnectButton />
+				<ConnectBtn account={props.account} connectWeb3={props.connectWeb3} disconnectWeb3={props.disconnectWeb3} />
 			</div>
+			{/* {props.account? : null} */}
+				{props.smartAccount && props.account? <AddFundsButton socialLoginSDK={props.socialLoginSDK} smartAccount={props.smartAccount}/>: null}
 		</>
 	)
 }
