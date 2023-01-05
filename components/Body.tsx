@@ -35,9 +35,9 @@ const Body = () => {
 			return socialLoginSDK
 		}
 		const sdk = new SocialLogin()
-		await sdk.init(ethers.utils.hexValue(5))
+		await sdk.init({chainId:ethers.utils.hexValue(5)})
 		setSocialLoginSDK(sdk)
-		sdk.showConnectModal()
+		// sdk.showConnectModal()
 		sdk.showWallet()
 		return socialLoginSDK
 	}, [socialLoginSDK])

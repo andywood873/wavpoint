@@ -1,4 +1,4 @@
-import { Center } from "@chakra-ui/react"
+import { Center, useDisclosure } from "@chakra-ui/react"
 import {
 	Box,
 	Fab,
@@ -15,10 +15,7 @@ import LitJsSdk from "@lit-protocol/sdk-browser"
 import { ethers } from "ethers"
 import AddIcon from "@mui/icons-material/Add"
 import MediaFooter from "./MediaFooter"
-import { SplitsClient } from "@0xsplits/splits-sdk"
-import { resolve } from "styled-jsx/css"
-import { ETHEREUM_CHAIN_IDS } from "@0xsplits/splits-sdk/dist/constants"
-
+import MintModal from "./MintModal"
 export default function UploadSite(props) {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
 	const [splitCounter, setSplitCounter] = useState(1)
@@ -44,7 +41,18 @@ export default function UploadSite(props) {
 	const [zoraDropAddress, setZoraDropAddress] = useState("")
 	const [imageIpfs, setImageIpfs] = useState("")
 	const [audioIpfs, setAudioIpfs] = useState("")
+	const [isModalOpen, setIsModalOpen] = useState(false)
+	const [modalTitle, setModalTitle] = useState("")
+	const [modalBody, setModalBody] = useState("")
+	const [modalProgress, setModalProgress] = useState(0)
+	const [isError, setIsError] = useState(false)
 
+	const handleModalClose = () => {
+		setIsModalOpen(false)
+	}
+	const handleModalOpen = () => {
+		setIsModalOpen(true)
+	}
 	const control = [
 		{
 			conditionType: "evmBasic",
@@ -222,7 +230,12 @@ export default function UploadSite(props) {
 				console.log("Encrypted tracklist Zip Blob ....")
 				console.log(tracklistEncrypted)
 				console.log("Encrypted Tracklist file!!")
-
+				handleModalOpen()
+				setModalTitle("Uploading to IPFS...")
+				setModalBody(
+					"Uploading your content to IPFS, please wait while we do some crypto magic in the background",
+				)
+				setModalProgress(33)
 				const audioCid = await uploadToIpfs(zipBlob, "audio")
 				const imageCid = await uploadToIpfs(selectedImageFile, "image")
 
@@ -246,9 +259,16 @@ export default function UploadSite(props) {
 				console.log(imageCid)
 				setImageIpfs(imageCid)
 				console.log(metadataCid)
-				createSplit()
-				dropZoraNft()
+				createSplit().then(async (address) => {
+					await dropZoraNft(address)
+				})
 			} else {
+				handleModalOpen()
+				setModalTitle("Uploading to IPFS...")
+				setModalBody(
+					"Uploading your content to IPFS, please wait while we do some crypto magic in the background",
+				)
+				setModalProgress(33)
 				const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
 				const imageCid = await uploadToIpfs(selectedImageFile, "image")
 				const metadataJson = {
@@ -267,27 +287,32 @@ export default function UploadSite(props) {
 				console.log(imageCid)
 				setImageIpfs(imageCid)
 				console.log(metadataCid)
-				createSplit().then(async () => {
-					await dropZoraNft()
+				createSplit().then(async (address) => {
+					await dropZoraNft(address)
 				})
 			}
 		} else {
-			createSplit().then(async () => {
-				await dropZoraNft()
+			createSplit().then(async (address) => {
+				await dropZoraNft(address)
 			})
 		}
 	}
 
-	async function dropZoraNft() {
+	async function dropZoraNft(splitAddressFromPromise) {
 		console.log("Starting Zora NFT drop....")
-		if (splitCreated) {
+		if (splitAddressFromPromise) {
 			// const date = new Date()
+			setModalTitle("Creating Zora Drops...")
+			setModalBody(
+				"Setting up NFT drop, please wait while we do some crypto magic in the background",
+			)
+			setModalProgress(90)
 			try {
 				const saleConfiguration = {
-					publicSaleStart: Date.now(),
-					publicSaleEnd: Date.now(),
-					presaleStart: Date.now(),
-					presaleEnd: Date.now(),
+					publicSaleStart: Date.now() + 60,
+					publicSaleEnd: Date.now() + 60,
+					presaleStart: Date.now() + 60,
+					presaleEnd: Date.now() + 60,
 					publicSalePrice: ethers.utils.parseEther("0.000001"),
 					maxSalePurchasePerAddress: 200,
 					presaleMerkleRoot:
@@ -314,12 +339,12 @@ export default function UploadSite(props) {
 					],
 				)
 				console.log("Sales Configs set.....")
-				const name = "WAVTHEORY01"
+				const name = "WAVTHEORY02"
 				const symbol = "WAV01"
 				const defaultAdmin = props.smartAccount.address
 				const editionSize = 200
-				const royaltyBps = royalty
-				const fundsRecipient = splitAddress
+				const royaltyBps = parseInt(royalty)
+				const fundsRecipient = splitAddressFromPromise
 				const nftDescription = description
 				const animationUrl = audioIpfs
 				const imageUrl = imageIpfs
@@ -328,6 +353,18 @@ export default function UploadSite(props) {
 					"event CreatedDrop(address indexed creator, address indexed editionContractAddress, uint256 editionSize)",
 					"function createEdition(string name, string symbol, uint64 editionSize, uint16 royaltyBPS, address fundsRecipient, address defaultAdmin, tuple(uint104 publicSalePrice, uint32 maxSalePurchasePerAddress, uint64 publicSaleStart, uint64 publicSaleEnd, uint64 presaleStart, uint64 presaleEnd, bytes32 presaleMerkleRoot) saleConfig, string description, string animationURI, string imageURI)",
 				])
+				console.log({
+					name: name,
+					symbol: symbol,
+					defaultAdmin: defaultAdmin,
+					editionSize: editionSize,
+					royaltyBps: royaltyBps,
+					fundsRecipient: fundsRecipient,
+					nftDescription: nftDescription,
+					animationUrl: animationUrl,
+					imageUrl: imageUrl,
+					saleConfiguration: saleConfiguration,
+				})
 				console.log("Zora Interface set....")
 				const data = zoraDropInterface.encodeFunctionData("createEdition", [
 					name,
@@ -342,7 +379,7 @@ export default function UploadSite(props) {
 					imageUrl,
 				])
 				console.log("Smart contract address")
-				console.log(props.smartAccount.address);
+				console.log(props.smartAccount.address)
 				console.log("Encoded data")
 				console.log(data)
 				const tx1 = {
@@ -401,13 +438,19 @@ export default function UploadSite(props) {
 						if (e !== undefined) {
 							setZoraDropCreated(true)
 							zoraDrop = e
-							setZoraDropAddress(e)
+							setZoraDropAddress(e.editionContractAddress)
+							setModalTitle("NFT DROP Created!")
+							setModalBody(
+								`Your NFT has been minted in the address ${e.editionContractAddress}.`,
+							)
 						}
 					})
 					console.log(zoraDrop)
 					console.log(zoraDropAddress)
+					setModalProgress(100)
 				})
 				console.log("Sending to relayer")
+				// transaction.nonce = transaction.nonce + 1
 				const txHash = await props.smartAccount.sendTransaction({
 					tx: transaction,
 					gasLimit,
@@ -420,6 +463,10 @@ export default function UploadSite(props) {
 			} catch (error) {
 				console.error("Something went wrong")
 				console.log(error)
+				setIsError(true)
+				setModalBody(
+					`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${props.smartAccount.address} or contact our support`,
+				)
 			}
 		} else {
 			console.log("Split Not created or Smart Account not connected!!!")
@@ -431,6 +478,11 @@ export default function UploadSite(props) {
 		return new Promise(async (resolve, reject) => {
 			if (props.provider) {
 				if (!splitAddress) {
+					setModalTitle("Creating Split....")
+					setModalBody(
+						"Setting up Splits, please wait while we do some crypto magic in the background",
+					)
+					setModalProgress(60)
 					console.log("Provider is true")
 					// const provider = props.provider
 					// console.log(provider)
@@ -513,9 +565,6 @@ export default function UploadSite(props) {
 							console.log("Event topic -----")
 							console.log(createEventTopic)
 							const events = res.receipt.logs.map((log) => {
-								// if (log.topics[0] === createEventTopic) {
-								// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
-								// }
 								try {
 									return splitInterface.decodeEventLog(
 										"CreateSplit",
@@ -536,7 +585,7 @@ export default function UploadSite(props) {
 								console.log(address)
 								setSplitAddress(address)
 								setSplitCreated(true)
-								resolve("Resolved Successfully")
+								resolve(address)
 							})
 						})
 						console.log("Sending to relayer")
@@ -553,9 +602,13 @@ export default function UploadSite(props) {
 					} catch (error) {
 						console.warn("Rejected transaction or someting happended")
 						console.log(error)
+						setIsError(true)
+						setModalBody(
+							`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${props.smartAccount.address} or contact our support`,
+						)
 					}
 				} else if (splitAddress) {
-					resolve("Have split address already")
+					resolve(splitAddress)
 				}
 			} else {
 				console.log("Connect Wallet Come on guys")
@@ -565,6 +618,9 @@ export default function UploadSite(props) {
 	}
 
 	async function encrypt(selectedFile, isZip) {
+		setModalTitle("Encrypting Content")
+		setModalBody("Encrypting your Content Using LIT Protocol...")
+		setModalProgress(15)
 		const client = new LitJsSdk.LitNodeClient()
 		await client.connect()
 		window.litNodeClient = client
@@ -660,7 +716,7 @@ export default function UploadSite(props) {
 				account={props.account}
 				connectWeb3={props.connectWeb3}
 				disconnectWeb3={props.disconnectWeb3}
-				smartAccount={props.smartAccount} 
+				smartAccount={props.smartAccount}
 				socialLoginSDK={props.socialLoginSDK}
 			/>
 			<div className="relative top-48 px-1/2 min-w-full">
@@ -919,7 +975,19 @@ export default function UploadSite(props) {
 			</div>
 			{/* <div className="min-w-full inset-y-2/3 px-10"> */}
 			<MediaFooter />
-			{/* </div> */}
+
+			<MintModal
+				isModalOpen={isModalOpen}
+				handleModalOpen={handleModalOpen}
+				handleModalClose={handleModalClose}
+				modalTitle={modalTitle}
+				modalBody={modalBody}
+				modalProgress={modalProgress}
+				isError={isError}
+				setIsError={setIsError}
+				zoraDropAddress={zoraDropAddress}
+				zoraDropCreated={zoraDropCreated}
+			/>
 		</div>
 	)
 }

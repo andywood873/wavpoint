@@ -17,10 +17,10 @@ export default function Navbar(props) {
 						Deploy Drop
 					</h2>
 				</Link>
-				<ConnectBtn account={props.account} connectWeb3={props.connectWeb3} disconnectWeb3={props.disconnectWeb3}/>
-				
+				<ConnectBtn account={props.account} connectWeb3={props.connectWeb3} disconnectWeb3={props.disconnectWeb3} />
 			</div>
-				{props.smartAccount.address && props.account? <AddFundsButton socialLoginSDK={props.socialLoginSDK} smartAccount={props.smartAccount}/>: null}
+			{/* {props.account? : null} */}
+				{props.smartAccount && props.account? <AddFundsButton socialLoginSDK={props.socialLoginSDK} smartAccount={props.smartAccount}/>: null}
 		</>
 	)
 }
