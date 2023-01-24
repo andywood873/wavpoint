@@ -4,101 +4,18 @@ import { ethers } from "ethers"
 import { useCallback, useEffect, useState } from "react"
 import { ChainId } from "../utils/chainConfig"
 import UploadSite from "./UploadSite"
+import { MintPageContext } from "./context/MintPageContext"
+import { useContext } from "react"
 
 const UploadBody = () => {
-	const [provider, setProvider] = useState<any>()
-	const [account, setAccount] = useState<string>()
-	const [smartAccount, setSmartAccount] = useState<SmartAccount | null>(null)
-	const [scwAddress, setScwAddress] = useState("")
-	const [scwLoading, setScwLoading] = useState(false)
-	const [socialLoginSDK, setSocialLoginSDK] = useState<SocialLogin | null>(null)
-
-	const connectWeb3 = useCallback(async () => {
-		if (typeof window === "undefined") return
-		console.log("socialLoginSDK", socialLoginSDK)
-		if (socialLoginSDK?.provider) {
-			const web3Provider = new ethers.providers.Web3Provider(
-				socialLoginSDK.provider,
-			)
-			setProvider(web3Provider)
-			const accounts = await web3Provider.listAccounts()
-			setAccount(accounts[0])
-			return
-		}
-		if (socialLoginSDK) {
-			socialLoginSDK.showWallet()
-			return socialLoginSDK
-		}
-		const sdk = new SocialLogin()
-		await sdk.init({chainId:ethers.utils.hexValue(5)})
-		setSocialLoginSDK(sdk)
-		// sdk.showConnectModal()
-		sdk.showWallet()
-		return socialLoginSDK
-	}, [socialLoginSDK])
-
-	// if wallet already connected close widget
-	useEffect(() => {
-		console.log("hidelwallet")
-		if (socialLoginSDK && socialLoginSDK.provider) {
-			socialLoginSDK.hideWallet()
-		}
-	}, [account, socialLoginSDK])
-
-	// after metamask login -> get provider event
-	useEffect(() => {
-		const interval = setInterval(async () => {
-			if (account) {
-				clearInterval(interval)
-			}
-			if (socialLoginSDK?.provider && !account) {
-				connectWeb3()
-			}
-		}, 1000)
-		return () => {
-			clearInterval(interval)
-		}
-	}, [account, connectWeb3, socialLoginSDK])
-
-	const disconnectWeb3 = async () => {
-		if (!socialLoginSDK || !socialLoginSDK.web3auth) {
-			console.error("Web3Modal not initialized.")
-			return
-		}
-		await socialLoginSDK.logout()
-		socialLoginSDK.hideWallet()
-		setProvider(undefined)
-		setAccount(undefined)
-		setScwAddress("")
-	}
-
-	useEffect(() => {
-		async function setupSmartAccount() {
-			setScwAddress("")
-			setScwLoading(true)
-			const smartAccount = new SmartAccount(provider, {
-				activeNetworkId: ChainId.GOERLI,
-				supportedNetworksIds: [ChainId.GOERLI],
-				networkConfig: [
-					{
-						chainId: ChainId.GOERLI,
-						dappAPIKey: process.env.NEXT_PUBLIC_BICONOMY_GOERLI,
-						// check in the beginning of the page to play around with testnet common keys
-						// customPaymasterAPI: <IPaymaster Instance of your own Paymaster>
-					},
-				],
-			})
-			await smartAccount.init()
-			const context = smartAccount.getSmartAccountContext()
-			setScwAddress(context.baseWallet.getAddress())
-			setSmartAccount(smartAccount)
-			setScwLoading(false)
-		}
-		if (!!provider && !!account) {
-			setupSmartAccount()
-			console.log("Provider...", provider)
-		}
-	}, [account, provider])
+	const {
+		account,
+		connectWeb3,
+		disconnectWeb3,
+		smartAccount,
+		socialLoginSDK,
+		provider,
+	} = useContext(MintPageContext)
 
 	return (
 		<div>
