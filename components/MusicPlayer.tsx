@@ -1,23 +1,15 @@
 import { Center } from "@chakra-ui/react";
 import { ClickAwayListener, IconButton } from "@mui/material";
 import { MusicPlayerPropInterface } from "../lib/Interfaces";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { MintPageAudioPlayerContext } from "./context/MintPageAudioPlayerContext";
 
 export default function MusicPlayer(props: MusicPlayerPropInterface) {
-    const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
-	const [isPlaying, setIsPlaying] = useState<boolean>(false)
-
-    function playAudio() {
-		setIsPlaying(true)
-		audio.play()
-	}
-	function stopAudio() {
-		audio.pause()
-		setIsPlaying(false)
-	}
+    const {playAudio,isPlaying,stopAudio,changeAudio} = useContext(MintPageAudioPlayerContext)
 
 	useEffect(() => {
-		setAudio(new Audio(props.audioFilePath))
+		const newAudio = new Audio(props.audioFilePath)
+		changeAudio(newAudio)
 	}, [])
 
 

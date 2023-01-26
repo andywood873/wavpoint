@@ -34,3 +34,7 @@ export interface MusicPlayerPropInterface {
     audioFilePath: string,
     backgroundFilePath: string,
 }
+
+export interface MintPageTotalCollectedInterface {
+    collectedNumber: number
+}
