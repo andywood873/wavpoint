@@ -10,11 +10,11 @@ import Link from "next/link"
 
 export default function MintNftButton(props: MintNftButtonInterface) {
 	// Show modal on click
-	function showModal(): void {
-		props.handleModalOpen()
-		if (!props.smartAccount) {
-		}
-	}
+	// function showModal(): void {
+	// 	props.handleModalOpen()
+	// 	if (!props.smartAccount) {
+	// 	}
+	// }
 	// Check if wallet is connected
 	// If connected check for balance in address
 	// if required balance in address create transaction and mint

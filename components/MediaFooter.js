@@ -2,7 +2,8 @@ import { Center } from "@chakra-ui/react"
 
 export default function MediaFooter() {
 	return (
-		<div className="relative top-[100rem] md:top-[20rem] border-slate-200 border-t-4 pt-20 md:pt-10 items-center px-10">
+		// <div className="relative top-[100rem] md:top-[20rem] border-slate-200 border-t-4 pt-20 md:pt-10 items-center px-10">
+		<div className="relative mt-[35rem] md:mt-[5rem] bottom-0 border-slate-200 border-t-4 pt-20 md:pt-10 items-center px-10">
 			<div className="md:flex justify-between">
 				<Center>
 					<div className="lg:2/3">

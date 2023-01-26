@@ -25,11 +25,11 @@ export default function MintPageAudioPlayer() {
 	}, [isPlaying])
 	return (
 		<div className="relative container top-[17rem] w-full px-[2.2rem]">
-			<h1 className="text-4xl text-left m-0">Jamiroquai</h1>
-			<p className="text-2xl text-left mt-5 text-[#888888]">
+			<h1 className="text-4xl text-left m-0 md:text-3xl md:text-4xl lg:text-6xl">Jamiroquai</h1>
+			<p className="text-2xl md:text-lg lg:text-2xl text-left mt-5 text-[#888888]">
 				Recorded: Chillington
 			</p>
-			<div className="min-w-full mt-10 flex items-center">
+			<div className="min-w-full mt-10 flex items-center  md:text-lg lg:text-2xl">
 				{/* <audio
 					controls
 					src="/One Piece OST_ Overtaken _ EPIC VERSION (Drums of Liberation).mp3"

@@ -7,9 +7,6 @@ export interface MintNftButtonInterface {
     provider: any | null,
     account: string,
     socialLoginSdk: SocialLogin | null,
-    handleModalClose: ()=>void,
-    handleModalOpen: ()=>void,
-    isModalOpen:boolean
 }
 
 export interface CardPropInterface {
@@ -33,6 +30,7 @@ export interface PopularPropInterface {
 export interface MusicPlayerPropInterface {
     audioFilePath: string,
     backgroundFilePath: string,
+    isClickAway?:boolean
 }
 
 export interface MintPageTotalCollectedInterface {

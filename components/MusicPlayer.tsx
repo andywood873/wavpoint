@@ -13,7 +13,7 @@ export default function MusicPlayer(props: MusicPlayerPropInterface) {
 	}, [])
 
 
-    return <ClickAwayListener onClickAway={stopAudio}>
+    return <ClickAwayListener onClickAway={props.isClickAway? ():void =>{}: stopAudio}>
 					<div className=" justify-items-center ">
 						<img
 							src={props.backgroundFilePath}
