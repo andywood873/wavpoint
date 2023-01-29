@@ -231,6 +231,7 @@ export default function UploadSite(props) {
 				console.log(tracklistEncrypted)
 				console.log("Encrypted Tracklist file!!")
 				handleModalOpen()
+				setIsError(false)
 				setModalTitle("Uploading to IPFS...")
 				setModalBody(
 					"Uploading your content to IPFS, please wait while we do some crypto magic in the background",
@@ -264,6 +265,7 @@ export default function UploadSite(props) {
 				})
 			} else {
 				handleModalOpen()
+				setIsError(false)
 				setModalTitle("Uploading to IPFS...")
 				setModalBody(
 					"Uploading your content to IPFS, please wait while we do some crypto magic in the background",
@@ -292,6 +294,8 @@ export default function UploadSite(props) {
 				})
 			}
 		} else {
+			handleModalOpen()
+			setIsError(false)
 			createSplit().then(async (address) => {
 				await dropZoraNft(address)
 			})
