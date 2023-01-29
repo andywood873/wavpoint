@@ -309,35 +309,16 @@ export default function UploadSite(props) {
 			setModalProgress(90)
 			try {
 				const saleConfiguration = {
-					publicSaleStart: Date.now() + 60,
-					publicSaleEnd: Date.now() + 60,
-					presaleStart: Date.now() + 60,
-					presaleEnd: Date.now() + 60,
-					publicSalePrice: ethers.utils.parseEther("0.000001"),
+					publicSaleStart: 0,
+					publicSaleEnd: Math.floor(new Date().getTime()/1000) + 31*24*60*60,
+					presaleStart: 0,
+					presaleEnd: 0,
+					publicSalePrice: ethers.utils.parseEther("0.00001"),
 					maxSalePurchasePerAddress: 200,
 					presaleMerkleRoot:
 						"0x0000000000000000000000000000000000000000000000000000000000000000",
 				}
-				const saleConfigurationEncoded = ethers.utils.AbiCoder.prototype.encode(
-					[
-						"uint64",
-						"uint64",
-						"uint64",
-						"uint64",
-						"uint104",
-						"uint32",
-						"bytes32",
-					],
-					[
-						Date.now(),
-						Date.now(),
-						Date.now(),
-						Date.now(),
-						ethers.utils.parseEther("0.000001").toNumber(),
-						200,
-						"0x0000000000000000000000000000000000000000000000000000000000000000",
-					],
-				)
+				console.log(saleConfiguration)
 				console.log("Sales Configs set.....")
 				const name = "WAVTHEORY02"
 				const symbol = "WAV01"

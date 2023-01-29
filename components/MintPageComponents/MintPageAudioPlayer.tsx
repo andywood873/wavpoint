@@ -44,7 +44,7 @@ export default function MintPageAudioPlayer() {
 					aria-label="Small"
 					// valueLabelDisplay="auto"
 					min={0}
-					max={audio ? audio.duration : 0}
+					max={audio ? audio.duration : 1}
 					className="mx-5"
 					onChange={(event: Event, value: number): void => {
 						audio.currentTime = value

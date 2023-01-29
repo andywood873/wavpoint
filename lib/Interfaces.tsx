@@ -7,6 +7,7 @@ export interface MintNftButtonInterface {
     provider: any | null,
     account: string,
     socialLoginSdk: SocialLogin | null,
+    isMintPage: boolean
 }
 
 export interface CardPropInterface {

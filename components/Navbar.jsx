@@ -7,7 +7,7 @@ export default function Navbar() {
 	const mintContext = useContext(MintPageContext)
 	return (
 		<>
-			<div className="absolute top-10 left-10 md:top-8 md:left-10 lg:left-8 lg:top-6 cursor-pointer">
+			<div className="absolute top-10 left-10 md:top-8 md:left-10 lg:left-8 lg:top-6 cursor-pointer z-30">
 				<Link href="/">
 				<img
 					src="/wavthe0ry-logo2@3x.png"

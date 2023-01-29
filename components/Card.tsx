@@ -33,9 +33,7 @@ export default function Card(props: CardPropInterface) {
 								provider={props.provider}
 								socialLoginSdk={props.socialLoginSdk}
 								account={props.account}
-								handleModalClose={handleModalClose}
-								handleModalOpen={handleModalOpen}
-								isModalOpen={isModalOpen}
+								isMintPage={false}
 							/>
 							<div className="justify-between gap-x-4 flex py-5 my-0 px-6">
 								<div className="container px-2 border-[#FF6700] border-2 w-[7.69rem] rounded-full my-6 text-[#FF6700] py-1 cursor-pointer">

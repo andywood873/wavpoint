@@ -44,6 +44,7 @@ export default function MintPage() {
 									provider={provider}
 									account={account}
 									socialLoginSdk={socialLoginSDK}
+									isMintPage={true}
 								/>
 							</div>
 						</div>
