@@ -29,7 +29,7 @@ export default function MintPage() {
 				<div className="relative">
 					<Navbar />
 				</div>
-				<Center className="relative md:-top-[10rem] flex flex-col 2xl:p-[10rem] 2xl:pt-0">
+				<Center className="relative md:top-[5rem] flex flex-col 2xl:p-[10rem] 2xl:pt-0 md:pt-0">
 					<div className="md:grid md:grid-cols-2 md:gap-4 md:items-start">
 						<div className="relative container w-full ">
 							<MintPageCard />
@@ -38,7 +38,7 @@ export default function MintPage() {
 						</div>
 						<div className="relative md:top-[12rem] md:pl-[2.2rem]">
 							<MintPageAudioPlayer />
-							<div className="relative min-w-full md:px-[] top-[20rem]">
+							<div className="relative min-w-full md:px-[] top-[20rem] md:top-[17rem]">
 								<MintNftButton
 									smartAccount={smartAccount}
 									provider={provider}

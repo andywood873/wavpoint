@@ -368,7 +368,7 @@ export default function UploadSite(props) {
 				console.log("Encoded data")
 				console.log(data)
 				const tx1 = {
-					to: "0xEf440fbD719cC5c3dDCD33b6f9986Ab3702E97A5",
+					to: "0xe31cccae5000C6B2361dd58316677d39685f50EB",
 					data: data,
 				}
 				const txs = []
@@ -480,7 +480,7 @@ export default function UploadSite(props) {
 					try {
 						const splitInterface = new ethers.utils.Interface([
 							"function createSplit(address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
-							"event CreateSplit(address indexed split)",
+							"event CreateSplit(address indexed split, address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
 						])
 						console.log(props.smartAccount.address)
 						let addressList = []

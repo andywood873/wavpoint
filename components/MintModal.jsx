@@ -50,7 +50,7 @@ export default function MintModal(props) {
 							<Center>
 								<div>
 									<a
-										href={`https://goerli.etherscan.io/address/${props.zoraDropAddress}`}
+										href={`https://mumbai.polygonscan.com/address/${props.zoraDropAddress}`}
 										target="_blank"
 										rel="noopener noreferrer"
 									>

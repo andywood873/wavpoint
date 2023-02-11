@@ -49,7 +49,7 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 				console.log(data)
 				const signer = props.provider.getSigner()
 				console.log(signer)
-				const contractAddress = "0xF7cE2375478Ac0CE9d010482497C9a8f09fdFEC1"
+				const contractAddress = "0x9621eaE8a423f0726963301D84023C3014515464"
 
 				const tx1: TransactionInterface = {
 					to: contractAddress,

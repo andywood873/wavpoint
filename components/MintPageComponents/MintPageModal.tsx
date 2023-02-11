@@ -51,7 +51,7 @@ export default function MintPageModal(props:MintPageModalInterface) {
 							<Center>
 								<div>
 									<a
-										href={`https://goerli.etherscan.io/tx/${props.txHash}`}
+										href={`https://mumbai.polygonscan.com/tx/${props.txHash}`}
 										target="_blank"
 										rel="noopener noreferrer"
 									>

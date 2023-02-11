@@ -44,7 +44,7 @@ const MintPageContextProvider = ({children}: MintPageContextType) =>{
 			return socialLoginSDK
 		}
 		const sdk = new SocialLogin()
-		await sdk.init({ chainId: ethers.utils.hexValue(5) })
+		await sdk.init({ chainId: ethers.utils.hexValue(80001) })
 		setSocialLoginSDK(sdk)
 		// sdk.showConnectModal()
 		sdk.showWallet()
@@ -91,11 +91,11 @@ const MintPageContextProvider = ({children}: MintPageContextType) =>{
 			setScwAddress("")
 			setScwLoading(true)
 			const smartAccount = new SmartAccount(provider, {
-				activeNetworkId: ChainId.GOERLI,
-				supportedNetworksIds: [ChainId.GOERLI],
+				activeNetworkId: ChainId.POLYGON_MUMBAI,
+				supportedNetworksIds: [ChainId.POLYGON_MUMBAI],
 				networkConfig: [
 					{
-						chainId: ChainId.GOERLI,
+						chainId: ChainId.POLYGON_MUMBAI,
 						dappAPIKey: process.env.NEXT_PUBLIC_BICONOMY_GOERLI,
 						// check in the beginning of the page to play around with testnet common keys
 						// customPaymasterAPI: <IPaymaster Instance of your own Paymaster>

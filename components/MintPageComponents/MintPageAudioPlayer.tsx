@@ -24,7 +24,7 @@ export default function MintPageAudioPlayer() {
 		}
 	}, [isPlaying])
 	return (
-		<div className="relative container top-[17rem] w-full px-[2.2rem]">
+		<div className="relative container top-[18rem] md:top-[10rem] w-full px-[2.2rem]">
 			<h1 className="text-4xl text-left m-0 md:text-3xl md:text-4xl lg:text-6xl">Jamiroquai</h1>
 			<p className="text-2xl md:text-lg lg:text-2xl text-left mt-5 text-[#888888]">
 				Recorded: Chillington
