@@ -6,7 +6,7 @@ export default function Header(props) {
 	
 	return (
 		<div className="flex justify-between relative">
-			<Navbar account={props.account} connectWeb3={props.connectWeb3} disconnectWeb3={props.disconnectWeb3} smartAccount={props.smartAccount} socialLoginSDK={props.socialLoginSDK}/>
+			<Navbar />
 			<div className="md:flex">
 				<div className="absolute top-64 left-10 w-2/3 h-44 md:top-56 md:left-10 md:w-2/5 md:h-20 lg:w-1/3 lg:h-16">
 					<span className="leading-9 font-azeretcus font-medium text-2xl md:text-xs md:text-sm space-x-20 tracking-wider uppercase whitespace-pre-wrap">

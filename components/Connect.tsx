@@ -2,7 +2,7 @@ import { CircularProgress } from "@mui/material"
 import { useState } from "react"
 
 export default function ConnectBtn(props) {
-	const [isClicked,setIsClicked] = useState(false)
+	const [isClicked,setIsClicked] = useState<boolean>(false)
 	async function connect() {
 		setIsClicked(true)
 		await props.connectWeb3()

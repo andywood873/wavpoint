@@ -10,7 +10,8 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import ErrorIcon from "@mui/icons-material/Error"
 import Link from "next/link"
-export default function MintModal(props) {
+import { MintPageModalInterface } from "../../lib/Interfaces"
+export default function MintPageModal(props:MintPageModalInterface) {
 	const style = {
 		position: "absolute",
 		top: "50%",
@@ -50,7 +51,7 @@ export default function MintModal(props) {
 							<Center>
 								<div>
 									<a
-										href={`https://mumbai.polygonscan.com/address/${props.zoraDropAddress}`}
+										href={`https://mumbai.polygonscan.com/tx/${props.txHash}`}
 										target="_blank"
 										rel="noopener noreferrer"
 									>
