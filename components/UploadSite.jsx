@@ -8,7 +8,7 @@ import {
 	TextField,
 } from "@mui/material"
 import Image from "next/image"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import Navbar from "./Navbar"
 import { Web3Storage } from "web3.storage"
 import LitJsSdk from "@lit-protocol/sdk-browser"
@@ -16,15 +16,17 @@ import { ethers } from "ethers"
 import AddIcon from "@mui/icons-material/Add"
 import MediaFooter from "./MediaFooter"
 import MintModal from "./MintModal"
+import { MintPageContext } from "./context/MintPageContext"
 export default function UploadSite(props) {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
+	const {provider, account, smartAccount, socialLoginSDK} = useContext(MintPageContext)
 	const [splitCounter, setSplitCounter] = useState(1)
 	const [input, setInput] = useState(
 		"0x12E618dDA8A05532f5e20286f849a372220B0b60",
 	)
 	const [selectedImageFile, setSelectedImageFile] = useState(null)
 	const [selectedAudioFile, setSelectedAudioFile] = useState(null)
-	const [tracklist, setTracklist] = useState([""])
+	const [tracklist, setTracklist] = useState([{trackId:"",startTimestamp:""}])
 	const [split, setSplit] = useState([{ address: "", percentage: "" }])
 	const [percentageError, setPercentageError] = useState(false)
 	const [percentHelperText, setPercentHelperText] = useState("")
@@ -41,6 +43,7 @@ export default function UploadSite(props) {
 	const [zoraDropAddress, setZoraDropAddress] = useState("")
 	const [imageIpfs, setImageIpfs] = useState("")
 	const [audioIpfs, setAudioIpfs] = useState("")
+	const [metadataIpfs, setMetadaIpfs] = useState("")
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [modalTitle, setModalTitle] = useState("")
 	const [modalBody, setModalBody] = useState("")
@@ -81,13 +84,21 @@ export default function UploadSite(props) {
 	}
 
 	function increaseTracks() {
-		const data = [...tracklist, ""]
+		const data = [...tracklist, {trackId:"",startTimestamp:""}]
 		setTracklist(data)
 	}
 
 	function handleTracklistChange(index, event) {
 		let data = tracklist
-		data[index] = event.target.value
+		data[index].trackId = event.target.value
+		console.log(data)
+		setTracklist(data)
+	}
+
+	function handleStartTimestampChange(index, event) {
+		let data = tracklist
+		data[index].startTimestamp = event.target.value
+		console.log(data)
 		setTracklist(data)
 	}
 
@@ -214,12 +225,12 @@ export default function UploadSite(props) {
 		console.log("Checked Addresses")
 		if (!(imageIpfs && audioIpfs)) {
 			if (isPrivate) {
-				const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
-					await encrypt(selectedAudioFile, true)
-				console.log(encryptedSymmetricKey)
-				console.log("Encrypted Audio Zip Blob ....")
-				console.log(zipBlob)
-				console.log("Encrypted Audio file!!")
+				// const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
+				// 	await encrypt(selectedAudioFile, true)
+				// console.log(encryptedSymmetricKey)
+				// console.log("Encrypted Audio Zip Blob ....")
+				// console.log(zipBlob)
+				// console.log("Encrypted Audio file!!")
 				const tracklistJsonString = JSON.stringify(tracklist)
 				console.log(tracklistJsonString)
 				const {
@@ -237,16 +248,16 @@ export default function UploadSite(props) {
 					"Uploading your content to IPFS, please wait while we do some crypto magic in the background",
 				)
 				setModalProgress(33)
-				const audioCid = await uploadToIpfs(zipBlob, "audio")
-				const imageCid = await uploadToIpfs(selectedImageFile, "image")
+				// const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
+				// const imageCid = await uploadToIpfs(selectedImageFile, "image")
 
 				const tracklistText = await new Response(tracklistEncrypted).text()
 
 				const metadataJson = {
-					image: "ipfs://" + imageCid,
+					// image: "ipfs://" + imageCid,
 					description: description,
 					name: "Name1",
-					animationUrl: "ipfs://" + audioCid,
+					// animationUrl: "ipfs://" + audioCid,
 					tracklist: tracklistText,
 					location: recordingLocation,
 					encryptedSymmetricKeyForTracklist: encryptedSymmetricKey2,
@@ -254,12 +265,17 @@ export default function UploadSite(props) {
 				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
 
 				console.log(metadataJson)
-				const metadataCid = await uploadToIpfs(metadataBlob, "metadata.json")
+				const {cid:metadataCid, audioURI:audioCid, imageURI:imageCid} = await uploadToIpfs([metadataBlob,selectedImageFile, selectedAudioFile], "data")
+				console.log("Type of selectedImage- ")
+				console.log(selectedImageFile.type)
+				console.log("Type of selectedAudio- ")
+				console.log(selectedAudioFile.type);
 				console.log(audioCid)
 				setAudioIpfs(audioCid)
 				console.log(imageCid)
 				setImageIpfs(imageCid)
 				console.log(metadataCid)
+				setMetadaIpfs(metadataCid)
 				createSplit().then(async (address) => {
 					await dropZoraNft(address)
 				})
@@ -271,24 +287,26 @@ export default function UploadSite(props) {
 					"Uploading your content to IPFS, please wait while we do some crypto magic in the background",
 				)
 				setModalProgress(33)
-				const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
-				const imageCid = await uploadToIpfs(selectedImageFile, "image")
+				// const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
+				// const imageCid = await uploadToIpfs(selectedImageFile, "image")
 				const metadataJson = {
-					image: "ipfs://" + imageCid,
+					// image: "ipfs://" + imageCid,
 					description: description,
 					name: "Name1",
-					animationUrl: "ipfs://" + audioCid,
+					// animationUrl: "ipfs://" + audioCid,
 					tracklist: JSON.stringify(tracklist),
 					location: recordingLocation,
+					encryptedSymmetricKeyForTracklist: null
 				}
 				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
 				console.log(metadataJson)
-				const metadataCid = await uploadToIpfs(metadataBlob, "metadata.json")
+				const {cid:metadataCid, audioURI:audioCid, imageURI:imageCid} = await uploadToIpfs(metadataBlob, "metadata.json")
 				console.log(audioCid)
 				setAudioIpfs(audioCid)
 				console.log(imageCid)
 				setImageIpfs(imageCid)
 				console.log(metadataCid)
+				setMetadaIpfs(metadataCid)
 				createSplit().then(async (address) => {
 					await dropZoraNft(address)
 				})
@@ -314,7 +332,8 @@ export default function UploadSite(props) {
 			try {
 				const saleConfiguration = {
 					publicSaleStart: 0,
-					publicSaleEnd: Math.floor(new Date().getTime()/1000) + 31*24*60*60,
+					publicSaleEnd:
+						Math.floor(new Date().getTime() / 1000) + 31 * 24 * 60 * 60,
 					presaleStart: 0,
 					presaleEnd: 0,
 					publicSalePrice: ethers.utils.parseEther("0.00001"),
@@ -331,6 +350,7 @@ export default function UploadSite(props) {
 				const royaltyBps = parseInt(royalty)
 				const fundsRecipient = splitAddressFromPromise
 				const nftDescription = description
+				const metadataUrl = metadataIpfs + "/metadata.json"
 				const animationUrl = audioIpfs
 				const imageUrl = imageIpfs
 				console.log("Inputs Set....")
@@ -610,10 +630,15 @@ export default function UploadSite(props) {
 		await client.connect()
 		window.litNodeClient = client
 		const accessControlConditions = control
-		const chain = "goerli"
+		const chain = "mumbai"
 
 		await client.connect()
-		const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
+		const provider2 = new ethers.providers.Web3Provider(
+			socialLoginSDK.provider,
+		);
+		const address = ethers.utils.getAddress(account).toLowerCase()
+		const authSig = await LitJsSdk.signAndSaveAuthMessage({web3:provider, chainId:"80001",account:address })
+		// await LitJsSdk.checkAndSignAuthMessage({ chain })
 		console.log("Authenticated MEssage:- ")
 		console.log(authSig)
 		console.log("The selected file- ")
@@ -684,14 +709,31 @@ export default function UploadSite(props) {
 		// const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
 		// await encrypt()
 		console.log("Done getting Encrypted FIle and key")
-
+		let imageType = zipBlob[1].type.split("/")[1]
+		// const imageExtension = 
+		console.log(imageType);
+		if (imageType.includes("svg")) {
+			imageType = "svg"
+		}
+		const audioType = zipBlob[2].type.split("/")[1]
+		console.log(audioType);
 		console.log("Putting files on ipfs.....")
-		const cid = await web3Client.put([new File([zipBlob], fileName)])
-
+		const imageFileName = "image"+"."+imageType
+		const audioFileName = "audio"+"."+audioType
+		const files = [new File([zipBlob[0]], "metadata.json"), new File([zipBlob[1]],imageFileName), new File([zipBlob[2]],audioFileName)]
+		const cid = await web3Client.put(files)
 		console.log("Uploaded to IPFS successfully. CID is :- ")
 		console.log(cid)
+		const audioFileURI = "ipfs://"+cid+"/"+audioFileName
+		const imageFileURI = "ipfs://"+cid+"/"+imageFileName
+		console.log("audioURI")
+		console.log(audioFileURI)
+		console.log("imageUri")
+		console.log(imageFileURI);
+		setAudioIpfs(audioFileURI)
+		setImageIpfs(imageFileURI)
 		// setLoading(false)
-		return cid
+		return {cid:cid, audioURI:audioFileURI, imageURI:imageFileURI}
 	}
 	// console.log(props.smartAccount.address)
 	// console.log(1e6);
@@ -819,22 +861,34 @@ export default function UploadSite(props) {
 						</div>
 
 						<Stack>
-							<h2>Tracklist</h2>
+							<h2>Track IDs</h2>
 							{tracklist.map((item, index) => {
 								return (
 									<div key={index}>
 										<h2 className="my-5 font-medium text-[#888888] font-['DM Sans'] text-md mx-1">
-											Tracklist {index + 1}
+											Track ID- {index + 1}
 										</h2>
-										<TextField
+										<div>
+											<TextField
+												id="outlined-basic"
+												label="Track ID"
+												variant="outlined"
+												name="tracklist"
+												// value={item}
+												sx={{ width: "35rem" }}
+												onChange={(event) =>
+													handleTracklistChange(index, event)
+												}
+											/>
+											<TextField 
 											id="outlined-basic"
-											label="TrackList"
+											label="Start Timestamp"
 											variant="outlined"
-											name="tracklist"
-											// value={item}
-											sx={{ width: "52.5rem" }}
-											onChange={(event) => handleTracklistChange(index, event)}
-										/>
+											name="startTimetstamp"
+											onChange={(event) => handleStartTimestampChange(index,event)}
+											// sx={{marginLeft:"3rem"}}
+											/>
+										</div>
 									</div>
 								)
 							})}
@@ -878,7 +932,7 @@ export default function UploadSite(props) {
 						</div>
 						<div className="flex my-10 float-right inline-block items-center">
 							<span className="mx-5">
-								Audio and Tracklist accesible only by collection holders?
+								Audio and Track ID accesible only by collection holders?
 							</span>
 							<Switch
 								checked={isPrivate}

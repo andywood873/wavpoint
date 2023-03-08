@@ -23,12 +23,12 @@ export default function Tracklist(props) {
 
 	return (
 		<Stack>
-			<h2>Tracklist</h2>
+			<h2>Track ID</h2>
 			{props.tracklist.map((item, index) => {
 				return (
 					<div key={item}>
 						<h2 className="my-5 font-medium text-[#888888] font-['DM Sans'] text-md mx-1">
-							Tracklist {index + 1}
+							Track ID {index + 1}
 						</h2>
 						<TextField
 							id="outlined-basic"
