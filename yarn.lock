@@ -3296,6 +3296,13 @@
     "@typescript-eslint/types" "5.40.0"
     eslint-visitor-keys "^3.3.0"
 
+"@urql/core@^3.0.3":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@urql/core/-/core-3.1.1.tgz#a49cd572360d01f2469a786b294fba2269a65e53"
+  integrity sha512-Mnxtq4I4QeFJsgs7Iytw+HyhiGxISR6qtyk66c9tipozLZ6QVxrCiUPF2HY4BxNIabaxcp+rivadvm8NAnXj4Q==
+  dependencies:
+    wonka "^6.1.2"
+
 "@walletconnect/browser-utils@^1.8.0":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@walletconnect/browser-utils/-/browser-utils-1.8.0.tgz#33c10e777aa6be86c713095b5206d63d32df0951"
@@ -12428,6 +12435,14 @@ url-set-query@^1.0.0:
   resolved "https://registry.yarnpkg.com/url-set-query/-/url-set-query-1.0.0.tgz#016e8cfd7c20ee05cafe7795e892bd0702faa339"
   integrity sha512-3AChu4NiXquPfeckE5R5cGdiHCMWJx1dwCWOmWIL4KHAziJNOFIYJlpGFeKDvwLPHovZRCxK3cYlwzqI9Vp+Gg==
 
+urql@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/urql/-/urql-3.0.3.tgz#275631f487558354e090d9ffc4ea2030bd56c34a"
+  integrity sha512-aVUAMRLdc5AOk239DxgXt6ZxTl/fEmjr7oyU5OGo8uvpqu42FkeJErzd2qBzhAQ3DyusoZIbqbBLPlnKo/yy2A==
+  dependencies:
+    "@urql/core" "^3.0.3"
+    wonka "^6.0.0"
+
 use-callback-ref@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/use-callback-ref/-/use-callback-ref-1.3.0.tgz#772199899b9c9a50526fedc4993fc7fa1f7e32d5"
@@ -13273,6 +13288,11 @@ wide-align@1.1.3:
   integrity sha512-QGkOQc8XL6Bt5PwnsExKBPuMKBxnGxWWW3fU55Xt4feHozMUhdUMaBCk290qpm/wG5u/RSKzwdAC4i51YigihA==
   dependencies:
     string-width "^1.0.2 || 2"
+
+wonka@^6.0.0, wonka@^6.1.2:
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/wonka/-/wonka-6.2.3.tgz#88f7852a23a3d53bca7411c70d66e9ce8f93a366"
+  integrity sha512-EFOYiqDeYLXSzGYt2X3aVe9Hq1XJG+Hz/HjTRRT4dZE9q95khHl5+7pzUSXI19dbMO1/2UMrTf7JT7/7JrSQSQ==
 
 word-wrap@^1.2.3, word-wrap@~1.2.3:
   version "1.2.3"

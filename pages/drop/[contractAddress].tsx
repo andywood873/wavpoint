@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic"
 import { useRouter } from "next/router"
-import Navbar from "../../components/Navbar"
+import Navbar from "../../components/Navbar" 
 import MediaFooter from "../../components/MediaFooter"
 import MintPageCard from "../../components/MintPageComponents/MintPageCard"
 import { Center } from "@chakra-ui/layout"

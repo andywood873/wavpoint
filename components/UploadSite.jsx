@@ -231,6 +231,13 @@ export default function UploadSite(props) {
 				// console.log("Encrypted Audio Zip Blob ....")
 				// console.log(zipBlob)
 				// console.log("Encrypted Audio file!!")
+				handleModalOpen()
+				setIsError(false)
+				setModalTitle("Encrypting with LIT...")
+				setModalBody(
+					"Encrypting the tracks and timestamps with LIT protocol....",
+				)
+				setModalProgress(10)
 				const tracklistJsonString = JSON.stringify(tracklist)
 				console.log(tracklistJsonString)
 				const {
@@ -241,7 +248,7 @@ export default function UploadSite(props) {
 				console.log("Encrypted tracklist Zip Blob ....")
 				console.log(tracklistEncrypted)
 				console.log("Encrypted Tracklist file!!")
-				handleModalOpen()
+				
 				setIsError(false)
 				setModalTitle("Uploading to IPFS...")
 				setModalBody(
@@ -256,11 +263,12 @@ export default function UploadSite(props) {
 				const metadataJson = {
 					// image: "ipfs://" + imageCid,
 					description: description,
-					name: "Name1",
+					name: "WAVPOINT"+props.nameNum,
 					// animationUrl: "ipfs://" + audioCid,
 					tracklist: tracklistText,
 					location: recordingLocation,
 					encryptedSymmetricKeyForTracklist: encryptedSymmetricKey2,
+					artist: artist
 				}
 				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
 
@@ -292,11 +300,12 @@ export default function UploadSite(props) {
 				const metadataJson = {
 					// image: "ipfs://" + imageCid,
 					description: description,
-					name: "Name1",
+					name: "WAVPOINT"+props.nameNum,
 					// animationUrl: "ipfs://" + audioCid,
 					tracklist: JSON.stringify(tracklist),
 					location: recordingLocation,
-					encryptedSymmetricKeyForTracklist: null
+					encryptedSymmetricKeyForTracklist: null,
+					artist: artist
 				}
 				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
 				console.log(metadataJson)
@@ -343,11 +352,11 @@ export default function UploadSite(props) {
 				}
 				console.log(saleConfiguration)
 				console.log("Sales Configs set.....")
-				const name = "WAVTHEORY02"
-				const symbol = "WAV01"
+				const name = "WAVTHEORY"+props.nameNum
+				const symbol = "WAV"+props.nameNum
 				const defaultAdmin = props.smartAccount.address
 				const editionSize = 200
-				const royaltyBps = parseInt(royalty)
+				const royaltyBps = parseInt(royalty) * 100
 				const fundsRecipient = splitAddressFromPromise
 				const nftDescription = description
 				const metadataUrl = metadataIpfs + "/metadata.json"
