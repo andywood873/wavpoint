@@ -24,6 +24,6 @@
 		"components/scw1.tsx",
 		"components/Connect.tsx",
 		"components/UploadSite.jsx"
-, "components/Card.tsx", "components/MintModal.jsx"	],
+, "components/Card.tsx", "components/MintModal.jsx", "pages/api/getNftName.js"	],
 	"exclude": ["node_modules"]
 }

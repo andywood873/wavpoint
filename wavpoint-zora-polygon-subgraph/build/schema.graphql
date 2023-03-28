@@ -1,0 +1,34 @@
+type Drop @entity {
+	id: ID!
+	address: Bytes!
+	creator: Bytes!
+	admin: Bytes!
+	symbol: String!
+	splitAddress: Bytes!
+	# description: String!
+	preSaleStart: BigInt!
+	preSaleEnd: BigInt!
+	publicSaleStart: BigInt!
+	publicSaleEnd: BigInt!
+	publicSalePrice: BigInt!
+	name: String!
+	uri: String!
+	root: String!
+	createdAt: BigInt!
+	editionSize: BigInt!
+	tokens: [Token!]! @derivedFrom(field: "collection")
+}
+
+type Token @entity {
+	id: ID!
+	address: Bytes!
+	tokenId: BigInt!
+	owner: User!
+	collection: Drop!
+	mintTime: BigInt!
+}
+
+type User @entity {
+	id: ID!
+	tokens: [Token!]! @derivedFrom(field: "owner")
+}

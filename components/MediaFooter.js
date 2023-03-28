@@ -1,6 +1,14 @@
 import { Center } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 
 export default function MediaFooter() {
+	const [year, setYear] = useState(2)
+
+	useEffect(() => {
+		const date = new Date()
+		const _year = date.getFullYear()
+		setYear(_year)
+	}, [])
 	return (
 		// <div className="relative top-[100rem] md:top-[20rem] border-slate-200 border-t-4 pt-20 md:pt-10 items-center px-10">
 		<div className="relative mt-[35rem] md:mt-[5rem] bottom-0 border-slate-200 border-t-4 pt-20 md:pt-10 items-center px-10">
@@ -16,7 +24,7 @@ export default function MediaFooter() {
 				<div className="text-center pb-14 relative top-14">
 					<div>
 						<span className="text-2xl font-medium text-[#888888] md:text-xl invisible lg:visible">
-							© Copyright 2022 Wavpoint, Inc.
+							© Copyright {year} Wavpoint, Inc.
 						</span>
 					</div>
 				</div>
@@ -46,7 +54,7 @@ export default function MediaFooter() {
 			</div>
 			<div className="text-center pb-2 md:text-right lg:invisible">
 				<span className="text-2xl font-medium text-[#888888] md:text-xl">
-					© Copyright 2022 Wavpoint, Inc.
+					© Copyright {year} Wavpoint, Inc.
 				</span>
 			</div>
 		</div>

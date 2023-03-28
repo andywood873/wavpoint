@@ -172,7 +172,7 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 		}
 	}
 	return (
-		<div className="cursor-pointer py-5 my-0 px-6">
+		<div className="cursor-pointer py-5 my-0 px-6 xl:px-0 xl:pb-0">
 			{props.isMintPage ? (
 				<div>
 					<div onClick={mintNft}>

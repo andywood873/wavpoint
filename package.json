@@ -32,6 +32,7 @@
     "react-audio-player": "^0.17.0",
     "react-dom": "18.2.0",
     "react-player": "^2.11.0",
+    "urql": "^3.0.3",
     "web3.storage": "^4.4.0"
   },
   "devDependencies": {

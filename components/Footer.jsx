@@ -1,6 +1,14 @@
 import { Center } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 
 export default function Footer() {
+	const [year, setYear] = useState(2)
+
+	useEffect(() => {
+		const date = new Date()
+		const _year = date.getFullYear()
+		setYear(_year)
+	}, [])
 	return (
 		<div className="relative top-[100rem] md:top-[80rem] border-slate-200 border-t-4 pt-20 md:pt-10 items-center ">
 			<div className="md:flex justify-between">
@@ -15,7 +23,7 @@ export default function Footer() {
 				<div className="text-center pb-14 relative top-14">
 					<div>
 						<span className="text-2xl font-medium text-[#888888] md:text-xl invisible lg:visible">
-							© Copyright 2022 Wavpoint, Inc.
+							© Copyright {year} Wavpoint, Inc.
 						</span>
 					</div>
 				</div>
@@ -45,7 +53,7 @@ export default function Footer() {
 			</div>
 			<div className="text-center pb-10 md:text-right lg:invisible">
 				<span className="text-2xl font-medium text-[#888888] md:text-xl">
-					© Copyright 2022 Wavpoint, Inc.
+					© Copyright {year} Wavpoint, Inc.
 				</span>
 			</div>
 		</div>

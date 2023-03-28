@@ -46,7 +46,7 @@ export default function Card(props: CardPropInterface) {
 									</Center>
 								</div>
 								<div className="px-2 border-[#FF6700] border-2 w-[7.69rem] rounded-full my-6 text-[#FF6700]  py-1 cursor-pointer">
-									<span className="hidden lg:inline-block">Tracklist</span>
+									<span className="hidden lg:inline-block">Track ID</span>
 									<Center>
 										<img src="/icon_tracklist.svg" className="lg:hidden"></img>
 									</Center>
