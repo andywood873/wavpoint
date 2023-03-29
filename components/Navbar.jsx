@@ -3,8 +3,14 @@ import ConnectBtn from "./Connect";
 import AddFundsButton from "./AddFundsButton"
 import { MintPageContext } from "./context/MintPageContext";
 import { useContext } from "react";
+import PrivyConnectBtn from "./PrivyConnectBtn";
+import { usePrivy } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
 export default function Navbar() {
-	const mintContext = useContext(MintPageContext)
+	// const mintContext = useContext(MintPageContext)
+	const {user, authenticated, ready} = usePrivy()
+	// const {address} = useAccount()
+	// console.log(`Address from wagmi:- ${address}`);
 	return (
 		<>
 			<div className="absolute top-10 left-10 md:top-8 md:left-10 lg:left-8 lg:top-6 cursor-pointer z-30">
@@ -21,10 +27,11 @@ export default function Navbar() {
 						Deploy Drop
 					</h2>
 				</Link>
-				<ConnectBtn account={mintContext.account} connectWeb3={mintContext.connectWeb3} disconnectWeb3={mintContext.disconnectWeb3} />
+				{/* <ConnectBtn account={mintContext.account} connectWeb3={mintContext.connectWeb3} disconnectWeb3={mintContext.disconnectWeb3} /> */}
+				<PrivyConnectBtn/>
 			</div>
 			{/* {props.account? : null} */}
-				{mintContext.smartAccount && mintContext.account? <AddFundsButton socialLoginSDK={mintContext.socialLoginSDK} smartAccount={mintContext.smartAccount}/>: null}
+				{ready && authenticated? <AddFundsButton user={user} address={user.wallet.address}/>: null}
 		</>
 	)
 }
