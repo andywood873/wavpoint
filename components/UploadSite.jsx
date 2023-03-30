@@ -17,9 +17,13 @@ import AddIcon from "@mui/icons-material/Add"
 import MediaFooter from "./MediaFooter"
 import MintModal from "./MintModal"
 import { MintPageContext } from "./context/MintPageContext"
+import { AsExternalProvider, PrivyProxyProvider, usePrivy } from "@privy-io/react-auth"
+import { useProvider } from "wagmi"
 export default function UploadSite(props) {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
-	const {provider, account, smartAccount, socialLoginSDK} = useContext(MintPageContext)
+	// const {provider, account, smartAccount, socialLoginSDK} = useContext(MintPageContext)
+	const {getEthersProvider, user, signMessage} =  usePrivy()
+	const provider = useProvider()
 	const [splitCounter, setSplitCounter] = useState(1)
 	const [input, setInput] = useState(
 		"0x12E618dDA8A05532f5e20286f849a372220B0b60",
@@ -642,12 +646,24 @@ export default function UploadSite(props) {
 		const chain = "mumbai"
 
 		await client.connect()
-		const provider2 = new ethers.providers.Web3Provider(
-			socialLoginSDK.provider,
-		);
-		const address = ethers.utils.getAddress(account).toLowerCase()
-		const authSig = await LitJsSdk.signAndSaveAuthMessage({web3:provider, chainId:"80001",account:address })
+		// const provider2 = new ethers.providers.Web3Provider(
+		// 	getEthersProvider(),
+		// );
+		const address = user?.wallet?.address.toLowerCase()
+		// const provider2 = new AsExternalProvider(provider)
+		console.log(address);
+		// const authSig = await LitJsSdk.signAndSaveAuthMessage({web3:getEthersProvider(), chainId:"84531",account:address })
 		// await LitJsSdk.checkAndSignAuthMessage({ chain })
+		console.log("Starting to make custom AuthSig")
+		const message = "This works"
+		const config = {
+			title: 'LIT Signature',
+			description: 'Sign this message to encrypt with LIT protocol',
+			buttonText: 'Sign and Encrypt'
+		  };
+		const signature = await signMessage(message, config);
+		console.log("Signed Custom");
+		const authSig = {sig:signature,derivedVia:"web3.eth.personal.sign",signedMessage:message,address:address}
 		console.log("Authenticated MEssage:- ")
 		console.log(authSig)
 		console.log("The selected file- ")

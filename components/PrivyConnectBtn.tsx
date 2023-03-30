@@ -1,14 +1,19 @@
 import { CircularProgress } from "@mui/material"
 import { usePrivy } from "@privy-io/react-auth"
 import { useState } from "react"
+import { useProvider, useSigner } from "wagmi"
 
 export default function PrivyConnectBtn() {
 	const [isClicked,setIsClicked] = useState<boolean>(false)
     const {login, logout, authenticated} = usePrivy()
+	const provider = useProvider()
+	
 	async function connect() {
 		setIsClicked(true)
 		await login()
 		setIsClicked(false)
+		// console.log(provider);
+		
 	}
 	return (
 		<div>
