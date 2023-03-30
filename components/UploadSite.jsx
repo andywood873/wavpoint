@@ -17,12 +17,18 @@ import AddIcon from "@mui/icons-material/Add"
 import MediaFooter from "./MediaFooter"
 import MintModal from "./MintModal"
 import { MintPageContext } from "./context/MintPageContext"
-import { AsExternalProvider, PrivyProxyProvider, usePrivy } from "@privy-io/react-auth"
+import {
+	AsExternalProvider,
+	PrivyProxyProvider,
+	usePrivy,
+} from "@privy-io/react-auth"
 import { useProvider } from "wagmi"
+import {v4 as uuidv4} from 'uuid'
+
 export default function UploadSite(props) {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
 	// const {provider, account, smartAccount, socialLoginSDK} = useContext(MintPageContext)
-	const {getEthersProvider, user, signMessage} =  usePrivy()
+	const { getEthersProvider, user, signMessage } = usePrivy()
 	const provider = useProvider()
 	const [splitCounter, setSplitCounter] = useState(1)
 	const [input, setInput] = useState(
@@ -30,7 +36,9 @@ export default function UploadSite(props) {
 	)
 	const [selectedImageFile, setSelectedImageFile] = useState(null)
 	const [selectedAudioFile, setSelectedAudioFile] = useState(null)
-	const [tracklist, setTracklist] = useState([{trackId:"",startTimestamp:""}])
+	const [tracklist, setTracklist] = useState([
+		{ trackId: "", startTimestamp: "" },
+	])
 	const [split, setSplit] = useState([{ address: "", percentage: "" }])
 	const [percentageError, setPercentageError] = useState(false)
 	const [percentHelperText, setPercentHelperText] = useState("")
@@ -88,7 +96,7 @@ export default function UploadSite(props) {
 	}
 
 	function increaseTracks() {
-		const data = [...tracklist, {trackId:"",startTimestamp:""}]
+		const data = [...tracklist, { trackId: "", startTimestamp: "" }]
 		setTracklist(data)
 	}
 
@@ -252,7 +260,7 @@ export default function UploadSite(props) {
 				console.log("Encrypted tracklist Zip Blob ....")
 				console.log(tracklistEncrypted)
 				console.log("Encrypted Tracklist file!!")
-				
+
 				setIsError(false)
 				setModalTitle("Uploading to IPFS...")
 				setModalBody(
@@ -267,21 +275,28 @@ export default function UploadSite(props) {
 				const metadataJson = {
 					// image: "ipfs://" + imageCid,
 					description: description,
-					name: "WAVPOINT"+props.nameNum,
+					name: "WAVPOINT" + props.nameNum,
 					// animationUrl: "ipfs://" + audioCid,
 					tracklist: tracklistText,
 					location: recordingLocation,
 					encryptedSymmetricKeyForTracklist: encryptedSymmetricKey2,
-					artist: artist
+					artist: artist,
 				}
 				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
 
 				console.log(metadataJson)
-				const {cid:metadataCid, audioURI:audioCid, imageURI:imageCid} = await uploadToIpfs([metadataBlob,selectedImageFile, selectedAudioFile], "data")
+				const {
+					cid: metadataCid,
+					audioURI: audioCid,
+					imageURI: imageCid,
+				} = await uploadToIpfs(
+					[metadataBlob, selectedImageFile, selectedAudioFile],
+					"data",
+				)
 				console.log("Type of selectedImage- ")
 				console.log(selectedImageFile.type)
 				console.log("Type of selectedAudio- ")
-				console.log(selectedAudioFile.type);
+				console.log(selectedAudioFile.type)
 				console.log(audioCid)
 				setAudioIpfs(audioCid)
 				console.log(imageCid)
@@ -304,16 +319,20 @@ export default function UploadSite(props) {
 				const metadataJson = {
 					// image: "ipfs://" + imageCid,
 					description: description,
-					name: "WAVPOINT"+props.nameNum,
+					name: "WAVPOINT" + props.nameNum,
 					// animationUrl: "ipfs://" + audioCid,
 					tracklist: JSON.stringify(tracklist),
 					location: recordingLocation,
 					encryptedSymmetricKeyForTracklist: null,
-					artist: artist
+					artist: artist,
 				}
 				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
 				console.log(metadataJson)
-				const {cid:metadataCid, audioURI:audioCid, imageURI:imageCid} = await uploadToIpfs(metadataBlob, "metadata.json")
+				const {
+					cid: metadataCid,
+					audioURI: audioCid,
+					imageURI: imageCid,
+				} = await uploadToIpfs(metadataBlob, "metadata.json")
 				console.log(audioCid)
 				setAudioIpfs(audioCid)
 				console.log(imageCid)
@@ -356,8 +375,8 @@ export default function UploadSite(props) {
 				}
 				console.log(saleConfiguration)
 				console.log("Sales Configs set.....")
-				const name = "WAVTHEORY"+props.nameNum
-				const symbol = "WAV"+props.nameNum
+				const name = "WAVTHEORY" + props.nameNum
+				const symbol = "WAV" + props.nameNum
 				const defaultAdmin = props.smartAccount.address
 				const editionSize = 200
 				const royaltyBps = parseInt(royalty) * 100
@@ -643,27 +662,29 @@ export default function UploadSite(props) {
 		await client.connect()
 		window.litNodeClient = client
 		const accessControlConditions = control
-		const chain = "mumbai"
+		const chain = "baseGoerli"
 
 		await client.connect()
-		// const provider2 = new ethers.providers.Web3Provider(
-		// 	getEthersProvider(),
-		// );
 		const address = user?.wallet?.address.toLowerCase()
-		// const provider2 = new AsExternalProvider(provider)
-		console.log(address);
-		// const authSig = await LitJsSdk.signAndSaveAuthMessage({web3:getEthersProvider(), chainId:"84531",account:address })
-		// await LitJsSdk.checkAndSignAuthMessage({ chain })
-		console.log("Starting to make custom AuthSig")
-		const message = "This works"
+		
+		console.log(address)
+		
+		const nonce = new Buffer(uuidv4()).toString('base64');
+		const message =
+			`localhost:3000 wants you to sign in with your Ethereum account:\n${user?.wallet?.address}\n\n\nURI: http://localhost:3000\nVersion: 1\nChain ID: 84531\nNonce: ${nonce}\nIssued At: ${new Date().toJSON()}`
 		const config = {
-			title: 'LIT Signature',
-			description: 'Sign this message to encrypt with LIT protocol',
-			buttonText: 'Sign and Encrypt'
-		  };
-		const signature = await signMessage(message, config);
-		console.log("Signed Custom");
-		const authSig = {sig:signature,derivedVia:"web3.eth.personal.sign",signedMessage:message,address:address}
+			title: "LIT Signature",
+			description: "Sign this message to encrypt with LIT protocol",
+			buttonText: "Sign and Encrypt",
+		}
+		const signature = await signMessage(message, config)
+		console.log("Signed Custom")
+		const authSig = {
+			sig: signature,
+			derivedVia: "web3.eth.personal.sign",
+			signedMessage: message,
+			address: user?.wallet?.address,
+		}
 		console.log("Authenticated MEssage:- ")
 		console.log(authSig)
 		console.log("The selected file- ")
@@ -735,30 +756,34 @@ export default function UploadSite(props) {
 		// await encrypt()
 		console.log("Done getting Encrypted FIle and key")
 		let imageType = zipBlob[1].type.split("/")[1]
-		// const imageExtension = 
-		console.log(imageType);
+		// const imageExtension =
+		console.log(imageType)
 		if (imageType.includes("svg")) {
 			imageType = "svg"
 		}
 		const audioType = zipBlob[2].type.split("/")[1]
-		console.log(audioType);
+		console.log(audioType)
 		console.log("Putting files on ipfs.....")
-		const imageFileName = "image"+"."+imageType
-		const audioFileName = "audio"+"."+audioType
-		const files = [new File([zipBlob[0]], "metadata.json"), new File([zipBlob[1]],imageFileName), new File([zipBlob[2]],audioFileName)]
+		const imageFileName = "image" + "." + imageType
+		const audioFileName = "audio" + "." + audioType
+		const files = [
+			new File([zipBlob[0]], "metadata.json"),
+			new File([zipBlob[1]], imageFileName),
+			new File([zipBlob[2]], audioFileName),
+		]
 		const cid = await web3Client.put(files)
 		console.log("Uploaded to IPFS successfully. CID is :- ")
 		console.log(cid)
-		const audioFileURI = "ipfs://"+cid+"/"+audioFileName
-		const imageFileURI = "ipfs://"+cid+"/"+imageFileName
+		const audioFileURI = "ipfs://" + cid + "/" + audioFileName
+		const imageFileURI = "ipfs://" + cid + "/" + imageFileName
 		console.log("audioURI")
 		console.log(audioFileURI)
 		console.log("imageUri")
-		console.log(imageFileURI);
+		console.log(imageFileURI)
 		setAudioIpfs(audioFileURI)
 		setImageIpfs(imageFileURI)
 		// setLoading(false)
-		return {cid:cid, audioURI:audioFileURI, imageURI:imageFileURI}
+		return { cid: cid, audioURI: audioFileURI, imageURI: imageFileURI }
 	}
 	// console.log(props.smartAccount.address)
 	// console.log(1e6);
@@ -905,13 +930,15 @@ export default function UploadSite(props) {
 													handleTracklistChange(index, event)
 												}
 											/>
-											<TextField 
-											id="outlined-basic"
-											label="Start Timestamp"
-											variant="outlined"
-											name="startTimetstamp"
-											onChange={(event) => handleStartTimestampChange(index,event)}
-											// sx={{marginLeft:"3rem"}}
+											<TextField
+												id="outlined-basic"
+												label="Start Timestamp"
+												variant="outlined"
+												name="startTimetstamp"
+												onChange={(event) =>
+													handleStartTimestampChange(index, event)
+												}
+												// sx={{marginLeft:"3rem"}}
 											/>
 										</div>
 									</div>
