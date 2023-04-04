@@ -22,7 +22,7 @@
     "@magic-ext/connect": "^3.1.0",
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.14",
-    "@privy-io/react-auth": "^1.19.0",
+    "@privy-io/react-auth": "^1.20.2",
     "@privy-io/wagmi-connector": "^0.0.6",
     "@web3auth/ui": "^4.1.0-alpha.0",
     "dotenv": "^16.0.3",

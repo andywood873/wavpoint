@@ -24,7 +24,14 @@ import useLivepeer from "./useLivepeer"
 export default function UploadSite(props) {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
 	// const {provider, account, smartAccount, socialLoginSDK} = useContext(MintPageContext)
-	const { getEthersProvider, user, signMessage } = usePrivy()
+	const {
+		getEthersProvider,
+		user,
+		signMessage,
+		authenticated,
+		ready,
+		sendTransaction,
+	} = usePrivy()
 	const provider = useProvider()
 	const [splitCounter, setSplitCounter] = useState(1)
 	const [input, setInput] = useState(
@@ -235,7 +242,7 @@ export default function UploadSite(props) {
 		}
 
 		console.log("Checked Addresses")
-		if (!(imageIpfs && audioIpfs)) {
+		if (!asset?.[0].storage.ipfs.nftMetadata) {
 			if (isPrivate) {
 				// const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
 				// 	await encrypt(selectedAudioFile, true)
@@ -271,7 +278,13 @@ export default function UploadSite(props) {
 				// const imageCid = await uploadToIpfs(selectedImageFile, "image")
 
 				const tracklistText = await new Response(tracklistEncrypted).text()
+				console.log("Tracklist Text")
+				console.log(tracklistText)
+				// if (typeof tracklistEncrypted === "string") {
+				// 	setTrackIdText(tracklistEncrypted)
+				// } else {
 				setTrackIdText(tracklistText)
+				// }
 				///////////// STarts here
 				// const metadataJson = {
 				// 	// image: "ipfs://" + imageCid,
@@ -393,7 +406,7 @@ export default function UploadSite(props) {
 				console.log("Sales Configs set.....")
 				const name = "WAVTHEORY" + props.nameNum
 				const symbol = "WAV" + props.nameNum
-				const defaultAdmin = props.smartAccount.address
+				const defaultAdmin = user?.wallet?.address
 				const editionSize = 200
 				const royaltyBps = parseInt(royalty) * 100
 				const fundsRecipient = splitAddressFromPromise
@@ -431,94 +444,82 @@ export default function UploadSite(props) {
 					animationUrl,
 					imageUrl,
 				])
-				console.log("Smart contract address")
-				console.log(props.smartAccount.address)
+				console.log("Wallet address")
+				console.log(user?.wallet?.address)
 				console.log("Encoded data")
 				console.log(data)
 				const tx1 = {
-					to: "0xe31cccae5000C6B2361dd58316677d39685f50EB",
+					to: "0xFd4090D856923aC877F203Aa43c713Caca2D56BF",
 					data: data,
 				}
-				const txs = []
-				txs.push(tx1)
-				console.log("Transactions")
-				console.log(txs)
-				const feeQuotes =
-					await props.smartAccount.prepareRefundTransactionBatch({
-						transactions: txs,
-					})
-				console.log("Fee quotes-----")
-				console.log(feeQuotes)
-				const transaction =
-					await props.smartAccount.createRefundTransactionBatch({
-						transactions: txs,
-						feeQuote: feeQuotes[0],
-					})
-				console.log("Created Transaction")
-				console.log(transaction)
-				let gasLimit = {
-					hex: "0x1E8480",
-					type: "hex",
+				const embeddedWallet = user.linkedAccounts.find(
+					(account) =>
+						account.type === "wallet" && account.walletClient === "privy",
+				)
+				if (embeddedWallet) {
+					sendTransaction(tx1)
+				} else {
+					console.log("Provider is true")
+					const provider = getEthersProvider()
+					// console.log(provider)
+					const signer = provider.getSigner()
+					console.log("Got signer...")
+					console.log("Creating transaction")
+					const txResponse = await signer.sendTransaction(tx1)
+					console.log("Sending traction")
+					const txReceipt = await txResponse.wait(1)
+					console.log(txReceipt)
 				}
-
-				props.smartAccount.on("txHashGenerated", (res) => {
-					console.log("Generated txHash:- ")
-					console.log(res.hash)
-				})
-
-				props.smartAccount.on("txMined", (res) => {
-					console.log("Tx Mined:- ")
-					console.log(res.hash)
-					console.log(res)
-					const events = res.receipt.logs.map((log) => {
-						// if (log.topics[0] === createEventTopic) {
-						// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
-						// }
-						try {
-							return zoraDropInterface.decodeEventLog(
-								"CreatedDrop",
-								log.data,
-								log.topics,
-							)
-						} catch (error) {
-							return
-						}
+				const events = txReceipt.logs.map((log) => {
+					// if (log.topics[0] === createEventTopic) {
+					// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
+					// }
+					try {
+						return zoraDropInterface.decodeEventLog(
+							"CreatedDrop",
+							log.data,
+							log.topics,
+						)
+					} catch (error) {
 						return
-					})
-					console.log(events)
-					let zoraDrop
-					events.forEach((e) => {
-						if (e !== undefined) {
-							setZoraDropCreated(true)
-							zoraDrop = e
-							setZoraDropAddress(e.editionContractAddress)
-							setModalTitle("NFT DROP Created!")
-							setModalBody(
-								`Your NFT has been minted in the address ${e.editionContractAddress}.`,
-							)
-						}
-					})
-					console.log(zoraDrop)
-					console.log(zoraDropAddress)
-					setModalProgress(100)
+					}
+					return
 				})
+				console.log("Events")
+				console.log(events)
+				let zoraDrop
+				events.forEach((e) => {
+					if (e !== undefined) {
+						setZoraDropCreated(true)
+						zoraDrop = e
+						setZoraDropAddress(e.editionContractAddress)
+						setModalTitle("NFT DROP Created!")
+						setModalBody(
+							`Your NFT has been minted in the address ${e.editionContractAddress}.`,
+						)
+					}
+				})
+				console.log(zoraDrop)
+				console.log(zoraDropAddress)
+				setModalProgress(100)
+
 				console.log("Sending to relayer")
 				// transaction.nonce = transaction.nonce + 1
-				const txHash = await props.smartAccount.sendTransaction({
-					tx: transaction,
-					gasLimit,
-				})
+				// const txHash = await props.smartAccount.sendTransaction({
+				// 	tx: transaction,
+				// 	gasLimit,
+				// })
 
 				console.log("Transaction Hash")
-				console.log(txHash)
+				console.log(txReceipt.transactionHash)
 				console.log("Transaction log")
-				console.log(transaction)
+				// console.log(transaction)
 			} catch (error) {
 				console.error("Something went wrong")
 				console.log(error)
 				setIsError(true)
 				setModalBody(
-					`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${props.smartAccount.address} or contact our support`,
+					`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${user?.wallet?.address} or contact our support`,
 				)
 			}
 		} else {
@@ -529,7 +530,7 @@ export default function UploadSite(props) {
 	function createSplit() {
 		console.log("Starting SPlit creation.....")
 		return new Promise(async (resolve, reject) => {
-			if (props.provider) {
+			if (authenticated && ready) {
 				if (!splitAddress) {
 					setModalTitle("Creating Split....")
 					setModalBody(
@@ -537,9 +538,9 @@ export default function UploadSite(props) {
 					)
 					setModalProgress(60)
 					console.log("Provider is true")
-					// const provider = props.provider
+					const provider = getEthersProvider()
 					// console.log(provider)
-					// const signer = provider.getSigner()
+					const signer = provider.getSigner()
 					console.log("Got signer...")
 					// console.log(signer)
 
@@ -548,9 +549,9 @@ export default function UploadSite(props) {
 					try {
 						const splitInterface = new ethers.utils.Interface([
 							"function createSplit(address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
-							"event CreateSplit(address indexed split, address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
+							"event CreateSplit(address indexed split)",
 						])
-						console.log(props.smartAccount.address)
+						console.log(user?.wallet?.address)
 						let addressList = []
 						console.log("Came till split address")
 
@@ -579,85 +580,59 @@ export default function UploadSite(props) {
 							controller,
 						])
 						const tx1 = {
-							to: "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE",
+							to: "0x18D354A857D1d9e72D0E2596BA23A564C51fcd25",
 							data: data,
 						}
-						const txs = []
-						txs.push(tx1)
-
-						const feeQuotes =
-							await props.smartAccount.prepareRefundTransactionBatch({
-								transactions: txs,
-							})
-						console.log("Fee quotes-----")
-						console.log(feeQuotes)
-						const transaction =
-							await props.smartAccount.createRefundTransactionBatch({
-								transactions: txs,
-								feeQuote: feeQuotes[0],
-							})
-						console.log("Created Transaction")
-						console.log(transaction)
-						let gasLimit = {
-							hex: "0x1E8480",
-							type: "hex",
+						const embeddedWallet = user.linkedAccounts.find(
+							(account) =>
+								account.type === "wallet" && account.walletClient === "privy",
+						)
+						if (embeddedWallet) {
+							sendTransaction(tx1)
+						} else {
+							console.log("Creating transaction")
+							const txResponse = await signer.sendTransaction(tx1)
+							console.log("Sending traction")
+							const txReceipt = await txResponse.wait(1)
+							console.log(txReceipt)
 						}
-						const createEventTopic = splitInterface.getEventTopic("CreateSplit")
-						props.smartAccount.on("txHashGenerated", (res) => {
-							console.log("Generated txHash:- ")
-							console.log(res.hash)
-						})
-						let address
-						props.smartAccount.on("txMined", (res) => {
-							console.log("Tx Mined:- ")
-							console.log(res.hash)
-							console.log(res)
-							// const tx = props.provider.getTransactionReceipt(res.hash)
-							// console.log("Transaction- ")
-							// console.log(tx)
-							console.log("Event topic -----")
-							console.log(createEventTopic)
-							const events = res.receipt.logs.map((log) => {
-								try {
-									return splitInterface.decodeEventLog(
-										"CreateSplit",
-										log.data,
-										log.topics,
-									)
-								} catch (error) {
-									return
-								}
+
+						const events = txReceipt.logs.map((log) => {
+							try {
+								return splitInterface.decodeEventLog(
+									"CreateSplit",
+									log.data,
+									log.topics,
+								)
+							} catch (error) {
 								return
-							})
-							console.log(events)
-							events.forEach((e) => {
-								if (e !== undefined) {
-									address = e.split
-								}
-								console.log("Address")
-								console.log(address)
-								setSplitAddress(address)
-								setSplitCreated(true)
-								resolve(address)
-							})
+							}
+							return
 						})
-						console.log("Sending to relayer")
-						const txHash = await props.smartAccount.sendTransaction({
-							tx: transaction,
-							gasLimit,
+
+						let address
+						console.log("Events")
+						console.log(events)
+						events.forEach((e) => {
+							if (e !== undefined) {
+								address = e.split
+							}
+							console.log("Address")
+							console.log(address)
+							setSplitAddress(address)
+							setSplitCreated(true)
+							resolve(address)
 						})
 
 						console.log("Transaction Hash")
-						console.log(txHash)
+						console.log(txReceipt.transactionHash)
 						console.log("Transaction log")
-						console.log(transaction)
-						//   await tx
 					} catch (error) {
 						console.warn("Rejected transaction or someting happended")
 						console.log(error)
 						setIsError(true)
 						setModalBody(
-							`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${props.smartAccount.address} or contact our support`,
+							`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${user?.wallet?.address} or contact our support`,
 						)
 					}
 				} else if (splitAddress) {
@@ -709,7 +684,11 @@ export default function UploadSite(props) {
 				address: user?.wallet?.address,
 			}
 		} else {
-			
+			authSig = await LitJsSdk.signAndSaveAuthMessage({
+				web3: getEthersProvider(),
+				chainId: "84531",
+				account: address,
+			})
 		}
 
 		console.log("Authenticated MEssage:- ")
@@ -774,13 +753,19 @@ export default function UploadSite(props) {
 	}
 
 	useEffect(() => {
-		if (progress?.[0].progress === 1 && asset?.[0].storage?.ipfs.nftMetadata) {
+		if (
+			progress?.[0].progress === 1 &&
+			asset?.[0].storage?.ipfs.nftMetadata &&
+			isModalOpen === true
+		) {
 			setImageIpfs(asset?.[0].storage?.ipfs.nftMetadata)
+			console.log("CID from Livepeer upload")
+			console.log(asset?.[0].storage?.ipfs.nftMetadata)
 			createSplit().then(async (address) => {
 				await dropZoraNft(address)
 			})
 		}
-	}, [asset])
+	}, [asset, authenticated])
 
 	return (
 		<div>

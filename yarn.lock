@@ -2731,10 +2731,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.6.tgz#cee20bd55e68a1720bdab363ecf0c821ded4cd45"
   integrity sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==
 
-"@privy-io/react-auth@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@privy-io/react-auth/-/react-auth-1.19.0.tgz#9941cbf9f21db91601fd7755ed1abfb5fa2e3f61"
-  integrity sha512-0I2V12uj8zY8N9hqWqqqDFkz+2A8AHDUzoRobKiis9QltVKcXKML8mlY2SJPHJudfk7XIhASyZkgz00OyWVMqA==
+"@privy-io/react-auth@^1.20.2":
+  version "1.20.2"
+  resolved "https://registry.yarnpkg.com/@privy-io/react-auth/-/react-auth-1.20.2.tgz#3df04eefc68e4534388673a2d96933e9d4b27353"
+  integrity sha512-X48IAwYr8UWBZrFEkZKYvnR5ieSPieaAlQLD3ydg+kCL1TKcNPHZmXGLMEpIFTsloWQkIGvsQ4OR+GKldlu5+g==
   dependencies:
     "@coinbase/wallet-sdk" "^3.6.4"
     "@ethersproject/address" "^5.7.0"

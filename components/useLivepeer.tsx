@@ -26,7 +26,7 @@ export default function useLivepeer(
 								metadata: {
 									name: name,
 									description: description,
-									trackList: trackList,
+									trackIds: trackList,
 								},
 							},
 						},
