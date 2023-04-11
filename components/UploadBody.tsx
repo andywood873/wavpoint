@@ -6,27 +6,28 @@ import { ChainId } from "../utils/chainConfig"
 import UploadSite from "./UploadSite"
 import { MintPageContext } from "./context/MintPageContext"
 import { useContext } from "react"
+import { createClient } from "urql"
+import { InferGetServerSidePropsType } from "next"
+import { GetServerSideProps } from "next"
 
-const UploadBody = () => {
-	const {
-		account,
-		connectWeb3,
-		disconnectWeb3,
-		smartAccount,
-		socialLoginSDK,
-		provider,
-	} = useContext(MintPageContext)
+
+
+const UploadBody = (props)=> {
+	// const {
+	// 	account,
+	// 	connectWeb3,
+	// 	disconnectWeb3,
+	// 	smartAccount,
+	// 	socialLoginSDK,
+	// 	provider,
+	// } = useContext(MintPageContext)
+	console.log(props.data)
 
 	return (
 		<div>
 			<UploadSite
-				provider={provider}
-				account={account}
-				connectWeb3={connectWeb3}
-				disconnectWeb3={disconnectWeb3}
-				smartAccount={smartAccount}
-				socialLoginSDK={socialLoginSDK}
-			/>
+				nameNum = {props.data}
+				/>
 		</div>
 	)
 }

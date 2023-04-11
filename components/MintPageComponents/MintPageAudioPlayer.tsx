@@ -24,9 +24,9 @@ export default function MintPageAudioPlayer() {
 		}
 	}, [isPlaying])
 	return (
-		<div className="relative container top-[18rem] md:top-[10rem] w-full px-[2.2rem]">
-			<h1 className="text-4xl text-left m-0 md:text-3xl md:text-4xl lg:text-6xl">Jamiroquai</h1>
-			<p className="text-2xl md:text-lg lg:text-2xl text-left mt-5 text-[#888888]">
+		<div className="relative container top-[18rem] md:top-[10rem] w-full px-[2.2rem] xl:px-0">
+			<h1 className="text-4xl text-left m-0 md:text-3xl md:text-4xl lg:text-5xl xl:pb-10">Jamiroquai</h1>
+			<p className="text-2xl md:text-lg lg:text-2xl text-left mt-5 text-[#888888] xl:mt-20">
 				Recorded: Chillington
 			</p>
 			<div className="min-w-full mt-10 flex items-center  md:text-lg lg:text-2xl">
