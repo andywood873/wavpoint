@@ -13,27 +13,21 @@ import { GetServerSideProps } from "next"
 
 
 const UploadBody = (props)=> {
-	const {
-		account,
-		connectWeb3,
-		disconnectWeb3,
-		smartAccount,
-		socialLoginSDK,
-		provider,
-	} = useContext(MintPageContext)
+	// const {
+	// 	account,
+	// 	connectWeb3,
+	// 	disconnectWeb3,
+	// 	smartAccount,
+	// 	socialLoginSDK,
+	// 	provider,
+	// } = useContext(MintPageContext)
 	console.log(props.data)
 
 	return (
 		<div>
 			<UploadSite
 				nameNum = {props.data}
-				provider={provider}
-				account={account}
-				connectWeb3={connectWeb3}
-				disconnectWeb3={disconnectWeb3}
-				smartAccount={smartAccount}
-				socialLoginSDK={socialLoginSDK}
-			/>
+				/>
 		</div>
 	)
 }

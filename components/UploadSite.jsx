@@ -1,4 +1,4 @@
-import { Center, useDisclosure } from "@chakra-ui/react"
+import { Center } from "@chakra-ui/react"
 import {
 	Box,
 	Fab,
@@ -8,7 +8,7 @@ import {
 	TextField,
 } from "@mui/material"
 import Image from "next/image"
-import { useContext, useState } from "react"
+import { useEffect, useState } from "react"
 import Navbar from "./Navbar"
 import { Web3Storage } from "web3.storage"
 import LitJsSdk from "@lit-protocol/sdk-browser"
@@ -16,17 +16,34 @@ import { ethers } from "ethers"
 import AddIcon from "@mui/icons-material/Add"
 import MediaFooter from "./MediaFooter"
 import MintModal from "./MintModal"
-import { MintPageContext } from "./context/MintPageContext"
+import { usePrivy } from "@privy-io/react-auth"
+import { useProvider } from "wagmi"
+import { v4 as uuidv4 } from "uuid"
+import useLivepeer from "./useLivepeer"
+
 export default function UploadSite(props) {
 	// const [tracklistCounter, setTracklistCounter] = useState(1)
-	const {provider, account, smartAccount, socialLoginSDK} = useContext(MintPageContext)
+	// const {provider, account, smartAccount, socialLoginSDK} = useContext(MintPageContext)
+	const {
+		getEthersProvider,
+		user,
+		signMessage,
+		authenticated,
+		ready,
+		sendTransaction,
+	} = usePrivy()
+	const provider = useProvider()
 	const [splitCounter, setSplitCounter] = useState(1)
 	const [input, setInput] = useState(
 		"0x12E618dDA8A05532f5e20286f849a372220B0b60",
 	)
 	const [selectedImageFile, setSelectedImageFile] = useState(null)
 	const [selectedAudioFile, setSelectedAudioFile] = useState(null)
-	const [tracklist, setTracklist] = useState([{trackId:"",startTimestamp:""}])
+	const [tracklist, setTracklist] = useState([
+		{ trackId: "", startTimestamp: "" },
+	])
+	const [trackIdText, setTrackIdText] = useState("")
+	// const [name, setName] = useState("")
 	const [split, setSplit] = useState([{ address: "", percentage: "" }])
 	const [percentageError, setPercentageError] = useState(false)
 	const [percentHelperText, setPercentHelperText] = useState("")
@@ -50,6 +67,8 @@ export default function UploadSite(props) {
 	const [modalProgress, setModalProgress] = useState(0)
 	const [isError, setIsError] = useState(false)
 
+	const { asset, createAsset, status, progress, asset2, makeAsset } =
+		useLivepeer(selectedAudioFile, artist, description, trackIdText)
 	const handleModalClose = () => {
 		setIsModalOpen(false)
 	}
@@ -84,7 +103,7 @@ export default function UploadSite(props) {
 	}
 
 	function increaseTracks() {
-		const data = [...tracklist, {trackId:"",startTimestamp:""}]
+		const data = [...tracklist, { trackId: "", startTimestamp: "" }]
 		setTracklist(data)
 	}
 
@@ -198,17 +217,17 @@ export default function UploadSite(props) {
 	}
 
 	async function upload() {
-		const json = {
-			image: selectedImageFile,
-			audio: selectedAudioFile,
-			artist: artist,
-			description: description,
-			tracklist: tracklist,
-			loaction: recordingLocation,
-			royalty: royalty,
-			split: split,
-		}
-		console.log(json)
+		// const json = {
+		// 	image: selectedImageFile,
+		// 	audio: selectedAudioFile,
+		// 	artist: artist,
+		// 	description: description,
+		// 	tracklist: tracklist,
+		// 	loaction: recordingLocation,
+		// 	royalty: royalty,
+		// 	split: split,
+		// }
+		// console.log(json)
 		let isAddressValid = false
 		for (let i = 0; i < split.length; i++) {
 			console.log("Checking Address of - " + split[i].address)
@@ -223,7 +242,7 @@ export default function UploadSite(props) {
 		}
 
 		console.log("Checked Addresses")
-		if (!(imageIpfs && audioIpfs)) {
+		if (!asset?.[0].storage.ipfs.nftMetadata) {
 			if (isPrivate) {
 				// const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
 				// 	await encrypt(selectedAudioFile, true)
@@ -248,7 +267,7 @@ export default function UploadSite(props) {
 				console.log("Encrypted tracklist Zip Blob ....")
 				console.log(tracklistEncrypted)
 				console.log("Encrypted Tracklist file!!")
-				
+
 				setIsError(false)
 				setModalTitle("Uploading to IPFS...")
 				setModalBody(
@@ -259,34 +278,59 @@ export default function UploadSite(props) {
 				// const imageCid = await uploadToIpfs(selectedImageFile, "image")
 
 				const tracklistText = await new Response(tracklistEncrypted).text()
+				console.log("Tracklist Text")
+				console.log(tracklistText)
+				// if (typeof tracklistEncrypted === "string") {
+				// 	setTrackIdText(tracklistEncrypted)
+				// } else {
+				setTrackIdText(tracklistText)
+				// }
+				///////////// STarts here
+				// const metadataJson = {
+				// 	// image: "ipfs://" + imageCid,
+				// 	description: description,
+				// 	name: "WAVPOINT" + props.nameNum,
+				// 	// animationUrl: "ipfs://" + audioCid,
+				// 	tracklist: tracklistText,
+				// 	location: recordingLocation,
+				// 	encryptedSymmetricKeyForTracklist: encryptedSymmetricKey2,
+				// 	artist: artist,
+				// }
+				// const metadataBlob = new Blob([JSON.stringify(metadataJson)])
 
-				const metadataJson = {
-					// image: "ipfs://" + imageCid,
-					description: description,
-					name: "WAVPOINT"+props.nameNum,
-					// animationUrl: "ipfs://" + audioCid,
-					tracklist: tracklistText,
-					location: recordingLocation,
-					encryptedSymmetricKeyForTracklist: encryptedSymmetricKey2,
-					artist: artist
-				}
-				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
-
-				console.log(metadataJson)
-				const {cid:metadataCid, audioURI:audioCid, imageURI:imageCid} = await uploadToIpfs([metadataBlob,selectedImageFile, selectedAudioFile], "data")
-				console.log("Type of selectedImage- ")
-				console.log(selectedImageFile.type)
-				console.log("Type of selectedAudio- ")
-				console.log(selectedAudioFile.type);
-				console.log(audioCid)
-				setAudioIpfs(audioCid)
-				console.log(imageCid)
-				setImageIpfs(imageCid)
-				console.log(metadataCid)
-				setMetadaIpfs(metadataCid)
-				createSplit().then(async (address) => {
-					await dropZoraNft(address)
-				})
+				// console.log(metadataJson)
+				// const {
+				// 	cid: metadataCid,
+				// 	audioURI: audioCid,
+				// 	imageURI: imageCid,
+				// } = await uploadToIpfs(
+				// 	[metadataBlob, selectedImageFile, selectedAudioFile],
+				// 	"data",
+				// )
+				////////////////// ENds here
+				////////////////// Changes here
+				console.log(artist)
+				console.log(description)
+				console.log(trackIdText)
+				// const cid = await updateAsset()
+				createAsset()
+				// const cid2 = updateAsset()
+				// console.log(cid)
+				// console.log(cid2)
+				////////////////// Changes End
+				// console.log("Type of selectedImage- ")
+				// console.log(selectedImageFile.type)
+				// console.log("Type of selectedAudio- ")
+				// console.log(selectedAudioFile.type)
+				// console.log(audioCid)
+				// setAudioIpfs(audioCid)
+				// console.log(imageCid)
+				// setImageIpfs(imageCid)
+				// console.log(metadataCid)
+				// setMetadaIpfs(metadataCid)
+				// createSplit().then(async (address) => {
+				// 	await dropZoraNft(address)
+				// })
 			} else {
 				handleModalOpen()
 				setIsError(false)
@@ -297,28 +341,36 @@ export default function UploadSite(props) {
 				setModalProgress(33)
 				// const audioCid = await uploadToIpfs(selectedAudioFile, "audio")
 				// const imageCid = await uploadToIpfs(selectedImageFile, "image")
-				const metadataJson = {
-					// image: "ipfs://" + imageCid,
-					description: description,
-					name: "WAVPOINT"+props.nameNum,
-					// animationUrl: "ipfs://" + audioCid,
-					tracklist: JSON.stringify(tracklist),
-					location: recordingLocation,
-					encryptedSymmetricKeyForTracklist: null,
-					artist: artist
-				}
-				const metadataBlob = new Blob([JSON.stringify(metadataJson)])
-				console.log(metadataJson)
-				const {cid:metadataCid, audioURI:audioCid, imageURI:imageCid} = await uploadToIpfs(metadataBlob, "metadata.json")
-				console.log(audioCid)
-				setAudioIpfs(audioCid)
-				console.log(imageCid)
-				setImageIpfs(imageCid)
-				console.log(metadataCid)
-				setMetadaIpfs(metadataCid)
-				createSplit().then(async (address) => {
-					await dropZoraNft(address)
-				})
+				// const metadataJson = {
+				// 	// image: "ipfs://" + imageCid,
+				// 	description: description,
+				// 	name: "WAVPOINT" + props.nameNum,
+				// 	// animationUrl: "ipfs://" + audioCid,
+				// 	tracklist: JSON.stringify(tracklist),
+				// 	location: recordingLocation,
+				// 	encryptedSymmetricKeyForTracklist: null,
+				// 	artist: artist,
+				// }
+				// const metadataBlob = new Blob([JSON.stringify(metadataJson)])
+				// console.log(metadataJson)
+				// const {
+				// 	cid: metadataCid,
+				// 	audioURI: audioCid,
+				// 	imageURI: imageCid,
+				// } = await uploadToIpfs(metadataBlob, "metadata.json")
+				// console.log(audioCid)
+				/////////////////////// Change starts
+				setTrackIdText(JSON.stringify(tracklist))
+				createAsset()
+				/////////////////////// Change ends
+				// setAudioIpfs(audioCid)
+				// console.log(imageCid)
+				// setImageIpfs(imageCid)
+				// console.log(metadataCid)
+				// setMetadaIpfs(metadataCid)
+				// createSplit().then(async (address) => {
+				// 	await dropZoraNft(address)
+				// })
 			}
 		} else {
 			handleModalOpen()
@@ -352,9 +404,9 @@ export default function UploadSite(props) {
 				}
 				console.log(saleConfiguration)
 				console.log("Sales Configs set.....")
-				const name = "WAVTHEORY"+props.nameNum
-				const symbol = "WAV"+props.nameNum
-				const defaultAdmin = props.smartAccount.address
+				const name = "WAVTHEORY" + props.nameNum
+				const symbol = "WAV" + props.nameNum
+				const defaultAdmin = user?.wallet?.address
 				const editionSize = 200
 				const royaltyBps = parseInt(royalty) * 100
 				const fundsRecipient = splitAddressFromPromise
@@ -392,94 +444,82 @@ export default function UploadSite(props) {
 					animationUrl,
 					imageUrl,
 				])
-				console.log("Smart contract address")
-				console.log(props.smartAccount.address)
+				console.log("Wallet address")
+				console.log(user?.wallet?.address)
 				console.log("Encoded data")
 				console.log(data)
 				const tx1 = {
-					to: "0xe31cccae5000C6B2361dd58316677d39685f50EB",
+					to: "0xFd4090D856923aC877F203Aa43c713Caca2D56BF",
 					data: data,
 				}
-				const txs = []
-				txs.push(tx1)
-				console.log("Transactions")
-				console.log(txs)
-				const feeQuotes =
-					await props.smartAccount.prepareRefundTransactionBatch({
-						transactions: txs,
-					})
-				console.log("Fee quotes-----")
-				console.log(feeQuotes)
-				const transaction =
-					await props.smartAccount.createRefundTransactionBatch({
-						transactions: txs,
-						feeQuote: feeQuotes[0],
-					})
-				console.log("Created Transaction")
-				console.log(transaction)
-				let gasLimit = {
-					hex: "0x1E8480",
-					type: "hex",
+				const embeddedWallet = user.linkedAccounts.find(
+					(account) =>
+						account.type === "wallet" && account.walletClient === "privy",
+				)
+				if (embeddedWallet) {
+					sendTransaction(tx1)
+				} else {
+					console.log("Provider is true")
+					const provider = getEthersProvider()
+					// console.log(provider)
+					const signer = provider.getSigner()
+					console.log("Got signer...")
+					console.log("Creating transaction")
+					const txResponse = await signer.sendTransaction(tx1)
+					console.log("Sending traction")
+					const txReceipt = await txResponse.wait(1)
+					console.log(txReceipt)
 				}
-
-				props.smartAccount.on("txHashGenerated", (res) => {
-					console.log("Generated txHash:- ")
-					console.log(res.hash)
-				})
-
-				props.smartAccount.on("txMined", (res) => {
-					console.log("Tx Mined:- ")
-					console.log(res.hash)
-					console.log(res)
-					const events = res.receipt.logs.map((log) => {
-						// if (log.topics[0] === createEventTopic) {
-						// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
-						// }
-						try {
-							return zoraDropInterface.decodeEventLog(
-								"CreatedDrop",
-								log.data,
-								log.topics,
-							)
-						} catch (error) {
-							return
-						}
+				const events = txReceipt.logs.map((log) => {
+					// if (log.topics[0] === createEventTopic) {
+					// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
+					// }
+					try {
+						return zoraDropInterface.decodeEventLog(
+							"CreatedDrop",
+							log.data,
+							log.topics,
+						)
+					} catch (error) {
 						return
-					})
-					console.log(events)
-					let zoraDrop
-					events.forEach((e) => {
-						if (e !== undefined) {
-							setZoraDropCreated(true)
-							zoraDrop = e
-							setZoraDropAddress(e.editionContractAddress)
-							setModalTitle("NFT DROP Created!")
-							setModalBody(
-								`Your NFT has been minted in the address ${e.editionContractAddress}.`,
-							)
-						}
-					})
-					console.log(zoraDrop)
-					console.log(zoraDropAddress)
-					setModalProgress(100)
+					}
+					return
 				})
+				console.log("Events")
+				console.log(events)
+				let zoraDrop
+				events.forEach((e) => {
+					if (e !== undefined) {
+						setZoraDropCreated(true)
+						zoraDrop = e
+						setZoraDropAddress(e.editionContractAddress)
+						setModalTitle("NFT DROP Created!")
+						setModalBody(
+							`Your NFT has been minted in the address ${e.editionContractAddress}.`,
+						)
+					}
+				})
+				console.log(zoraDrop)
+				console.log(zoraDropAddress)
+				setModalProgress(100)
+
 				console.log("Sending to relayer")
 				// transaction.nonce = transaction.nonce + 1
-				const txHash = await props.smartAccount.sendTransaction({
-					tx: transaction,
-					gasLimit,
-				})
+				// const txHash = await props.smartAccount.sendTransaction({
+				// 	tx: transaction,
+				// 	gasLimit,
+				// })
 
 				console.log("Transaction Hash")
-				console.log(txHash)
+				console.log(txReceipt.transactionHash)
 				console.log("Transaction log")
-				console.log(transaction)
+				// console.log(transaction)
 			} catch (error) {
 				console.error("Something went wrong")
 				console.log(error)
 				setIsError(true)
 				setModalBody(
-					`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${props.smartAccount.address} or contact our support`,
+					`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${user?.wallet?.address} or contact our support`,
 				)
 			}
 		} else {
@@ -490,7 +530,7 @@ export default function UploadSite(props) {
 	function createSplit() {
 		console.log("Starting SPlit creation.....")
 		return new Promise(async (resolve, reject) => {
-			if (props.provider) {
+			if (authenticated && ready) {
 				if (!splitAddress) {
 					setModalTitle("Creating Split....")
 					setModalBody(
@@ -498,9 +538,9 @@ export default function UploadSite(props) {
 					)
 					setModalProgress(60)
 					console.log("Provider is true")
-					// const provider = props.provider
+					const provider = getEthersProvider()
 					// console.log(provider)
-					// const signer = provider.getSigner()
+					const signer = provider.getSigner()
 					console.log("Got signer...")
 					// console.log(signer)
 
@@ -509,9 +549,9 @@ export default function UploadSite(props) {
 					try {
 						const splitInterface = new ethers.utils.Interface([
 							"function createSplit(address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
-							"event CreateSplit(address indexed split, address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)",
+							"event CreateSplit(address indexed split)",
 						])
-						console.log(props.smartAccount.address)
+						console.log(user?.wallet?.address)
 						let addressList = []
 						console.log("Came till split address")
 
@@ -540,85 +580,59 @@ export default function UploadSite(props) {
 							controller,
 						])
 						const tx1 = {
-							to: "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE",
+							to: "0x18D354A857D1d9e72D0E2596BA23A564C51fcd25",
 							data: data,
 						}
-						const txs = []
-						txs.push(tx1)
-
-						const feeQuotes =
-							await props.smartAccount.prepareRefundTransactionBatch({
-								transactions: txs,
-							})
-						console.log("Fee quotes-----")
-						console.log(feeQuotes)
-						const transaction =
-							await props.smartAccount.createRefundTransactionBatch({
-								transactions: txs,
-								feeQuote: feeQuotes[0],
-							})
-						console.log("Created Transaction")
-						console.log(transaction)
-						let gasLimit = {
-							hex: "0x1E8480",
-							type: "hex",
+						const embeddedWallet = user.linkedAccounts.find(
+							(account) =>
+								account.type === "wallet" && account.walletClient === "privy",
+						)
+						if (embeddedWallet) {
+							sendTransaction(tx1)
+						} else {
+							console.log("Creating transaction")
+							const txResponse = await signer.sendTransaction(tx1)
+							console.log("Sending traction")
+							const txReceipt = await txResponse.wait(1)
+							console.log(txReceipt)
 						}
-						const createEventTopic = splitInterface.getEventTopic("CreateSplit")
-						props.smartAccount.on("txHashGenerated", (res) => {
-							console.log("Generated txHash:- ")
-							console.log(res.hash)
-						})
-						let address
-						props.smartAccount.on("txMined", (res) => {
-							console.log("Tx Mined:- ")
-							console.log(res.hash)
-							console.log(res)
-							// const tx = props.provider.getTransactionReceipt(res.hash)
-							// console.log("Transaction- ")
-							// console.log(tx)
-							console.log("Event topic -----")
-							console.log(createEventTopic)
-							const events = res.receipt.logs.map((log) => {
-								try {
-									return splitInterface.decodeEventLog(
-										"CreateSplit",
-										log.data,
-										log.topics,
-									)
-								} catch (error) {
-									return
-								}
+
+						const events = txReceipt.logs.map((log) => {
+							try {
+								return splitInterface.decodeEventLog(
+									"CreateSplit",
+									log.data,
+									log.topics,
+								)
+							} catch (error) {
 								return
-							})
-							console.log(events)
-							events.forEach((e) => {
-								if (e !== undefined) {
-									address = e.split
-								}
-								console.log("Address")
-								console.log(address)
-								setSplitAddress(address)
-								setSplitCreated(true)
-								resolve(address)
-							})
+							}
+							return
 						})
-						console.log("Sending to relayer")
-						const txHash = await props.smartAccount.sendTransaction({
-							tx: transaction,
-							gasLimit,
+
+						let address
+						console.log("Events")
+						console.log(events)
+						events.forEach((e) => {
+							if (e !== undefined) {
+								address = e.split
+							}
+							console.log("Address")
+							console.log(address)
+							setSplitAddress(address)
+							setSplitCreated(true)
+							resolve(address)
 						})
 
 						console.log("Transaction Hash")
-						console.log(txHash)
+						console.log(txReceipt.transactionHash)
 						console.log("Transaction log")
-						console.log(transaction)
-						//   await tx
 					} catch (error) {
 						console.warn("Rejected transaction or someting happended")
 						console.log(error)
 						setIsError(true)
 						setModalBody(
-							`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${props.smartAccount.address} or contact our support`,
+							`We ran into some problem. Please ensure there is adequete ETH for gas fees in your smart contract wallet- ${user?.wallet?.address} or contact our support`,
 						)
 					}
 				} else if (splitAddress) {
@@ -639,15 +653,44 @@ export default function UploadSite(props) {
 		await client.connect()
 		window.litNodeClient = client
 		const accessControlConditions = control
-		const chain = "mumbai"
+		const chain = "baseGoerli"
 
 		await client.connect()
-		const provider2 = new ethers.providers.Web3Provider(
-			socialLoginSDK.provider,
-		);
-		const address = ethers.utils.getAddress(account).toLowerCase()
-		const authSig = await LitJsSdk.signAndSaveAuthMessage({web3:provider, chainId:"80001",account:address })
-		// await LitJsSdk.checkAndSignAuthMessage({ chain })
+		const address = user?.wallet?.address.toLowerCase()
+
+		console.log(address)
+
+		const nonce = new Buffer(uuidv4()).toString("base64")
+		const message = `localhost:3000 wants you to sign in with your Ethereum account:\n${
+			user?.wallet?.address
+		}\n\n\nURI: http://localhost:3000\nVersion: 1\nChain ID: 84531\nNonce: ${nonce}\nIssued At: ${new Date().toJSON()}`
+		const config = {
+			title: "LIT Signature",
+			description: "Sign this message to encrypt with LIT protocol",
+			buttonText: "Sign and Encrypt",
+		}
+		const embeddedWallet = user.linkedAccounts.find(
+			(account) =>
+				account.type === "wallet" && account.walletClient === "privy",
+		)
+		let authSig
+		if (embeddedWallet) {
+			const signature = await signMessage(message, config)
+			console.log("Signed Custom")
+			authSig = {
+				sig: signature,
+				derivedVia: "web3.eth.personal.sign",
+				signedMessage: message,
+				address: user?.wallet?.address,
+			}
+		} else {
+			authSig = await LitJsSdk.signAndSaveAuthMessage({
+				web3: getEthersProvider(),
+				chainId: "84531",
+				account: address,
+			})
+		}
+
 		console.log("Authenticated MEssage:- ")
 		console.log(authSig)
 		console.log("The selected file- ")
@@ -709,43 +752,21 @@ export default function UploadSite(props) {
 		}
 	}
 
-	async function uploadToIpfs(zipBlob, fileName) {
-		// setLoading(true)
-		const token = process.env.NEXT_PUBLIC_WEB3_STORAGE
-		const web3Client = new Web3Storage({ token: token })
-
-		console.log("Getting Encrypted FIle and key...")
-		// const { zipBlob, encryptedSymmetricKey, accessControlConditions } =
-		// await encrypt()
-		console.log("Done getting Encrypted FIle and key")
-		let imageType = zipBlob[1].type.split("/")[1]
-		// const imageExtension = 
-		console.log(imageType);
-		if (imageType.includes("svg")) {
-			imageType = "svg"
+	useEffect(() => {
+		if (
+			progress?.[0].progress === 1 &&
+			asset?.[0].storage?.ipfs.nftMetadata &&
+			isModalOpen === true
+		) {
+			setImageIpfs(asset?.[0].storage?.ipfs.nftMetadata)
+			console.log("CID from Livepeer upload")
+			console.log(asset?.[0].storage?.ipfs.nftMetadata)
+			createSplit().then(async (address) => {
+				await dropZoraNft(address)
+			})
 		}
-		const audioType = zipBlob[2].type.split("/")[1]
-		console.log(audioType);
-		console.log("Putting files on ipfs.....")
-		const imageFileName = "image"+"."+imageType
-		const audioFileName = "audio"+"."+audioType
-		const files = [new File([zipBlob[0]], "metadata.json"), new File([zipBlob[1]],imageFileName), new File([zipBlob[2]],audioFileName)]
-		const cid = await web3Client.put(files)
-		console.log("Uploaded to IPFS successfully. CID is :- ")
-		console.log(cid)
-		const audioFileURI = "ipfs://"+cid+"/"+audioFileName
-		const imageFileURI = "ipfs://"+cid+"/"+imageFileName
-		console.log("audioURI")
-		console.log(audioFileURI)
-		console.log("imageUri")
-		console.log(imageFileURI);
-		setAudioIpfs(audioFileURI)
-		setImageIpfs(imageFileURI)
-		// setLoading(false)
-		return {cid:cid, audioURI:audioFileURI, imageURI:imageFileURI}
-	}
-	// console.log(props.smartAccount.address)
-	// console.log(1e6);
+	}, [asset, authenticated])
+
 	return (
 		<div>
 			<Navbar
@@ -840,7 +861,7 @@ export default function UploadSite(props) {
 							>
 								<input
 									type="file"
-									accept="audio/*"
+									accept="video/*"
 									className="input_audio"
 									hidden
 									onChange={(e) => {
@@ -858,7 +879,7 @@ export default function UploadSite(props) {
 										Upload or drag & drop artwork
 									</p>
 									<p className="text-[#888888] text-center font-['DM Sans'] mx-2.5">
-										.MP3 or .WAV
+										.MP4
 									</p>
 									{selectedAudioFile ? (
 										<p className="font-medium text-center font-['DM Sans'] mx-2.5">
@@ -889,13 +910,15 @@ export default function UploadSite(props) {
 													handleTracklistChange(index, event)
 												}
 											/>
-											<TextField 
-											id="outlined-basic"
-											label="Start Timestamp"
-											variant="outlined"
-											name="startTimetstamp"
-											onChange={(event) => handleStartTimestampChange(index,event)}
-											// sx={{marginLeft:"3rem"}}
+											<TextField
+												id="outlined-basic"
+												label="Start Timestamp"
+												variant="outlined"
+												name="startTimetstamp"
+												onChange={(event) =>
+													handleStartTimestampChange(index, event)
+												}
+												// sx={{marginLeft:"3rem"}}
 											/>
 										</div>
 									</div>

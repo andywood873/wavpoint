@@ -13,30 +13,24 @@ import { MintPageContext } from "./context/MintPageContext"
 import { useContext } from "react"
 
 const Body = () => {
-	const {
-		account,
-		connectWeb3,
-		disconnectWeb3,
-		smartAccount,
-		socialLoginSDK,
-		provider,
-	} = useContext(MintPageContext)
+	// const {
+	// 	account,
+	// 	connectWeb3,
+	// 	disconnectWeb3,
+	// 	smartAccount,
+	// 	socialLoginSDK,
+	// 	provider,
+	// } = useContext(MintPageContext)
 
 	return (
 		<div className="divide-y-8">
 			<div>
-				<Header
-					account={account}
-					connectWeb3={connectWeb3}
-					disconnectWeb3={disconnectWeb3}
-					smartAccount={smartAccount}
-					socialLoginSDK={socialLoginSDK}
-				/>
+				<Header/>
 				<Popular
-					account={account}
-					smartAccount={smartAccount}
-					socialLoginSdk={socialLoginSDK}
-					provider={provider}
+					// account={account}
+					// smartAccount={smartAccount}
+					// socialLoginSdk={socialLoginSDK}
+					// provider={provider}
 				/>
 				<Recent />
 				<LowerPanel />
