@@ -1,7 +1,6 @@
 import { MintNftButtonInterface, TransactionInterface } from "../lib/Interfaces"
 import { useState } from "react"
-import { Center } from "@chakra-ui/react"
-import { ClickAwayListener } from "@mui/material"
+
 import Link from "next/link"
 import { ethers } from "ethers"
 

@@ -3,7 +3,7 @@ import Transak from "@biconomy/transak"
 
 export default function AddFundsButton(props) {
 	async function add() {
-		// const userInfo = await props.socialLoginSDK.getUserInfo()
+	
         const transak = new Transak('STAGING', {
             walletAddress: props.address,
             userData: {

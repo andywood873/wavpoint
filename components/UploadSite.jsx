@@ -10,7 +10,7 @@ import {
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import Navbar from "./Navbar"
-import { Web3Storage } from "web3.storage"
+
 import LitJsSdk from "@lit-protocol/sdk-browser"
 import { ethers } from "ethers"
 import AddIcon from "@mui/icons-material/Add"

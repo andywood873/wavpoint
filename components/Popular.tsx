@@ -1,5 +1,3 @@
-import { Grid } from "@mui/material"
-import { Box } from "@mui/system"
 import Card from "./Card"
 import { PopularPropInterface } from "../lib/Interfaces"
 

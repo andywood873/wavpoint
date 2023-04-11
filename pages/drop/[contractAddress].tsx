@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic"
 import { useRouter } from "next/router"
 import Navbar from "../../components/Navbar"
 import MediaFooter from "../../components/MediaFooter"
