@@ -15,9 +15,9 @@ export default function Popular(props: PopularPropInterface) {
 						audioFilePath="/One Piece OST_ Overtaken _ EPIC VERSION (Drums of Liberation).mp3"
 						backgroundFilePath="/Rectangle 122@3x.png"
 						createdBy="D&D Studio"
-						smartAccount={props.smartAccount}
+						// smartAccount={props.smartAccount}
 						provider={props.provider}
-						socialLoginSdk={props.socialLoginSdk}
+						// socialLoginSdk={props.socialLoginSdk}
 						account={props.account}
 					/>
 				</div>
@@ -26,9 +26,9 @@ export default function Popular(props: PopularPropInterface) {
 						audioFilePath="/One Piece OST_ Overtaken _ EPIC VERSION (Drums of Liberation).mp3"
 						backgroundFilePath="/Rectangle 2@3x.png"
 						createdBy="Fool's Gold"
-						smartAccount={props.smartAccount}
+						// smartAccount={props.smartAccount}
 						provider={props.provider}
-						socialLoginSdk={props.socialLoginSdk}
+						// socialLoginSdk={props.socialLoginSdk}
 						account={props.account}
 					/>
 				</div>
@@ -37,9 +37,9 @@ export default function Popular(props: PopularPropInterface) {
 						audioFilePath="/One Piece OST_ Overtaken _ EPIC VERSION (Drums of Liberation).mp3"
 						backgroundFilePath="/Mask group@3x.png"
 						createdBy="Chillington"
-						smartAccount={props.smartAccount}
+						// smartAccount={props.smartAccount}
 						provider={props.provider}
-						socialLoginSdk={props.socialLoginSdk}
+						// socialLoginSdk={props.socialLoginSdk}
 						account={props.account}
 					/>
 				</div>
