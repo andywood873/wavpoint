@@ -1,11 +1,11 @@
 import dynamic from "next/dynamic"
 import { useRouter } from "next/router"
-import Navbar from "../../components/Navbar" 
+import Navbar from "../../components/Navbar"
 import MediaFooter from "../../components/MediaFooter"
 import MintPageCard from "../../components/MintPageComponents/MintPageCard"
 import { Center } from "@chakra-ui/layout"
 import MintPageTotalCollected from "../../components/MintPageComponents/MintPageTotalCollected"
-import { useContext, useState } from "react"
+import {  useState } from "react"
 import MintPageAudioPlayerContextProvider from "../../components/context/MintPageAudioPlayerContext"
 import MintPageAudioPlayer from "../../components/MintPageComponents/MintPageAudioPlayer"
 import {
@@ -15,22 +15,24 @@ import {
 	deployedDate,
 } from "../../utils/mockData"
 import MintNftButton from "../../components/MintNftButton"
-import { MintPageContext } from "../../components/context/MintPageContext"
+// import { MintPageContext } from "../../components/context/MintPageContext"
 import MintPageTotalCollectedAudioPlayer from "../../components/MintPageComponents/MintPageTotalCollectedAudioPlayer"
+import { usePrivy } from "@privy-io/react-auth"
 
 export default function MintPage() {
 	const router = useRouter()
-	const { smartAccount, provider, account, socialLoginSDK } =
-		useContext(MintPageContext)
+	// const { smartAccount, provider, account, socialLoginSDK } =
+	// 	useContext(MintPageContext)
+	const { user, getEthersProvider } = usePrivy()
 	const { contractAddress } = router.query
 	const [collectedNumber, setCollectedNumber] = useState<number>(0)
 	return (
 		<div className="relative font-azeretcus ">
 			<MintPageAudioPlayerContextProvider>
-				<div className="relative">
+				<div className="static">
 					<Navbar />
 				</div>
-				<Center className="relative flex flex-col">
+				<Center className=" flex flex-col">
 					<div className="md:grid md:grid-cols-2 md:gap-4 md:items-start md:top-[0rem] lg:p-[0rem] lg:pt-[0rem] md:pt-0">
 						<div className="relative container w-full ">
 							<MintPageCard />
@@ -42,10 +44,8 @@ export default function MintPage() {
 							<MintPageAudioPlayer />
 							<div className="relative min-w-full top-[20rem] md:top-[17rem] xl:grid xl:grid-cols-2 xl:gap-2 xl:top-[15rem]">
 								<MintNftButton
-									smartAccount={smartAccount}
-									provider={provider}
-									account={account}
-									socialLoginSdk={socialLoginSDK}
+									provider={getEthersProvider()}
+									account={user?.wallet?.address}
 									isMintPage={true}
 								/>
 								<MintPageTotalCollectedAudioPlayer

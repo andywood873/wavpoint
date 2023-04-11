@@ -29,9 +29,9 @@ export default function Card(props: CardPropInterface) {
 								Recorded: {props.createdBy}
 							</span>
 							<MintNftButton
-								smartAccount={props.smartAccount}
+								// smartAccount={props.smartAccount}
 								provider={props.provider}
-								socialLoginSdk={props.socialLoginSdk}
+								// socialLoginSdk={props.socialLoginSdk}
 								account={props.account}
 								isMintPage={false}
 							/>

@@ -1,31 +1,29 @@
-import SmartAccount from "@biconomy/smart-account"
-import SocialLogin from "@biconomy/web3-auth"
+// import SmartAccount from "@biconomy/smart-account"
+// import SocialLogin from "@biconomy/web3-auth"
 import { Bytes, ethers } from "ethers"
 import { Dispatch, SetStateAction } from "react"
 
 export interface MintNftButtonInterface {
-    smartAccount: SmartAccount | null,
     provider: any | null,
     account: string,
-    socialLoginSdk: SocialLogin | null,
     isMintPage: boolean
 }
 
 export interface CardPropInterface {
-    smartAccount: SmartAccount | null,
+    // smartAccount: SmartAccount | null,
     provider: any | null,
     account: string,
-    socialLoginSdk: SocialLogin | null,
+    // socialLoginSdk: SocialLogin | null,
     audioFilePath: string,
     backgroundFilePath: string,
     createdBy: string
 }
 
 export interface PopularPropInterface {
-    smartAccount: SmartAccount | null,
+    // smartAccount: SmartAccount | null,
     provider: any | null,
     account: string,
-    socialLoginSdk: SocialLogin | null,
+    // socialLoginSdk: SocialLogin | null,
     
 }
 

@@ -1,16 +1,13 @@
-import SmartAccount from "@biconomy/smart-account"
-import SocialLogin from "@biconomy/web3-auth"
 import { MintNftButtonInterface, TransactionInterface } from "../lib/Interfaces"
-import Box from "@mui/material/Box"
-import Modal from "@mui/material/Modal"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Center } from "@chakra-ui/react"
 import { ClickAwayListener } from "@mui/material"
 import Link from "next/link"
 import { ethers } from "ethers"
-import { FeeQuote, IWalletTransaction } from "@biconomy/core-types"
+
 import { MintModalTitleEnum, MintModalBodyEnum } from "../lib/Enums"
 import MintPageModal from "./MintPageComponents/MintPageModal"
+import { usePrivy } from "@privy-io/react-auth"
 
 export default function MintNftButton(props: MintNftButtonInterface) {
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -19,7 +16,7 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 	const [modalProgress, setModalProgress] = useState<number>(0)
 	const [isError, setIsError] = useState<boolean>(false)
 	const [txHash, setTxHash] = useState<string>()
-
+	const { authenticated, user, ready, signMessage } = usePrivy()
 	const handleModalClose = () => {
 		setIsModalOpen(false)
 		setTxHash("")
@@ -32,7 +29,7 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 		// console.log(props.smartAccount.address)
 		setIsModalOpen(true)
 		// Check if wallet is connected
-		if (props.smartAccount) {
+		if (authenticated && ready) {
 			try {
 				const zoraNFTMintAbi: string[] = [
 					"function purchase(uint256 quantity) external payable returns (uint256)",
@@ -49,7 +46,7 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 				console.log(data)
 				const signer = props.provider.getSigner()
 				console.log(signer)
-				const contractAddress = "0x9621eaE8a423f0726963301D84023C3014515464"
+				const contractAddress = "0x99De3D08e756eA7DB0AC4B0b3717218d0b519DCC"
 
 				const tx1: TransactionInterface = {
 					to: contractAddress,
@@ -57,94 +54,63 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 					value: ethers.utils.parseEther("0.00001"),
 				}
 
-				const txs: TransactionInterface[] = []
-				txs.push(tx1)
-				console.log("Transactions")
-				console.log(txs)
-				const feeQuotes: FeeQuote[] =
-					await props.smartAccount.prepareRefundTransactionBatch({
-						transactions: txs,
-					})
-				console.log("Fee quotes-----")
-				console.log(feeQuotes)
-
 				setModalTitle(MintModalTitleEnum.createTx)
 				setModalBody(MintModalBodyEnum.createTx)
 				setModalProgress(35)
-
-				const transaction: IWalletTransaction =
-					await props.smartAccount.createRefundTransactionBatch({
-						transactions: txs,
-						feeQuote: feeQuotes[0],
-					})
-				console.log("Created Transaction")
-				console.log(transaction)
-				let gasLimit = {
-					hex: "0x1E8480",
-					type: "hex",
+				const embeddedWallet = user.linkedAccounts.find(
+					(account) =>
+						account.type === "wallet" && account.walletClient === "privy",
+				)
+				let txReceipt
+				if (embeddedWallet) {
+					// signMessage(t)
+					console.log("Embedded Wallet support yet to come!")
+				} else {
+					console.log("Creating transaction")
+					const txResponse = await signer.sendTransaction(tx1)
+					setModalTitle(MintModalTitleEnum.sentTx)
+					setModalBody(MintModalBodyEnum.sentTx)
+					setModalProgress(65)
+					console.log("Sending traction")
+					txReceipt = await txResponse.wait(1)
+					console.log(txReceipt)
 				}
 
-				props.smartAccount.on("txHashGenerated", (res) => {
-					console.log("Generated txHash:- ")
-					console.log(res.hash)
-				})
-
-				props.smartAccount.on("txMined", (res) => {
-					console.log("Tx Mined:- ")
-					console.log(res.hash)
-					setTxHash(res.hash)
-					console.log(res)
-					const events = res.receipt.logs.map((log) => {
-						// if (log.topics[0] === createEventTopic) {
-						// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
-						// }
-
-						try {
-							const event = zoraNftMintInterface.decodeEventLog(
-								"Transfer",
-								log.data,
-								log.topics,
-							)
-							return event
-						} catch (error) {
-							return
-						}
+				const events = txReceipt.logs.map((log) => {
+					try {
+						const event = zoraNftMintInterface.decodeEventLog(
+							"Transfer",
+							log.data,
+							log.topics,
+						)
+						return event
+					} catch (error) {
 						return
-					})
-					console.log(events)
-					let zoraDrop
-					events.forEach((e) => {
-						if (e !== undefined) {
-							// setZoraDropCreated(true)
-							zoraDrop = e
-							// console.log(zoraDrop)
-
-							// setZoraDropAddress(e.editionContractAddress)
-							// setModalTitle("NFT DROP Created!")
-							// setModalBody(
-							// `Your NFT has been minted in the address ${e.editionContractAddress}.`,
-							// )
-						}
-					})
-					console.log(zoraDrop)
-					console.log(zoraDrop._tokenId)
-					setModalTitle(MintModalTitleEnum.successTx)
-					setModalBody(MintModalBodyEnum.successTx)
-					setModalProgress(100)
+					}
+					return
 				})
-				const txHash = await props.smartAccount.sendTransaction({
-					tx: transaction,
-					gasLimit,
+				console.log(events)
+				let zoraDrop
+				events.forEach((e) => {
+					if (e !== undefined) {
+						zoraDrop = e
+					}
 				})
-
-				setModalTitle(MintModalTitleEnum.sentTx)
-				setModalBody(MintModalBodyEnum.sentTx)
-				setModalProgress(65)
+				console.log(zoraDrop)
+				console.log(zoraDrop._tokenId)
+				setModalTitle(MintModalTitleEnum.successTx)
+				setModalBody(MintModalBodyEnum.successTx)
+				setModalProgress(100)
+				// })
+				// const txHash = await props.smartAccount.sendTransaction({
+				// 	tx: transaction,
+				// 	gasLimit,
+				// })
 
 				console.log("Transaction Hash")
 				console.log(txHash)
 				console.log("Transaction log")
-				console.log(transaction)
+				// console.log(transaction)
 			} catch (error) {
 				console.log(error)
 				setIsError(true)
