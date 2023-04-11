@@ -1,4 +1,3 @@
-import SocialLogin from "@biconomy/web3-auth"
 import Transak from "@biconomy/transak"
 
 export default function AddFundsButton(props) {
