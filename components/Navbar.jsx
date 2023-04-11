@@ -1,21 +1,18 @@
 import Link from "next/link"
-import ConnectBtn from "./Connect"
+
 import AddFundsButton from "./AddFundsButton"
-// import { MintPageContext } from "./context/MintPageContext";
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import PrivyConnectBtn from "./PrivyConnectBtn"
 import { usePrivy } from "@privy-io/react-auth"
-import { useAccount, useNetwork, useSwitchNetwork } from "wagmi"
+import {  useNetwork, useSwitchNetwork } from "wagmi"
 import { ethers } from "ethers"
 export default function Navbar() {
-	// const mintContext = useContext(MintPageContext)
+	
 	const [hasWavpoint, setHasWavpoint] = useState(false)
 	const { chain } = useNetwork()
 	const { switchNetwork } = useSwitchNetwork({ chainId: 84531 })
 	const { user, authenticated, ready, getEthersProvider } = usePrivy()
 
-	// const {address} = useAccount()
-	// console.log(`Address from wagmi:- ${user?.wallet?.address}`);
 	useEffect(() => {
 		if (user) {
 			// console.log(chain);
