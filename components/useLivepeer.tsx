@@ -1,5 +1,5 @@
-import { useInterval } from "@chakra-ui/react"
-import { useAsset, useCreateAsset, useUpdateAsset } from "@livepeer/react"
+
+import { useAsset, useCreateAsset} from "@livepeer/react"
 import { useEffect } from "react"
 
 export default function useLivepeer(
