@@ -20,8 +20,7 @@ import { usePrivy } from "@privy-io/react-auth"
 
 export default function MintPage() {
 	const router = useRouter()
-	// const { smartAccount, provider, account, socialLoginSDK } =
-	// 	useContext(MintPageContext)
+
 	const { user, getEthersProvider } = usePrivy()
 	const { contractAddress } = router.query
 	const [collectedNumber, setCollectedNumber] = useState<number>(0)
