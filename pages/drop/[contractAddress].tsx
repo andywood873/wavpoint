@@ -16,14 +16,20 @@ import {
 import MintNftButton from "../../components/MintNftButton"
 // import { MintPageContext } from "../../components/context/MintPageContext"
 import MintPageTotalCollectedAudioPlayer from "../../components/MintPageComponents/MintPageTotalCollectedAudioPlayer"
-import { usePrivy } from "@privy-io/react-auth"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
 
 export default function MintPage() {
 	const router = useRouter()
 
-	const { user, getEthersProvider } = usePrivy()
+	const { user } = usePrivy()
+	const {wallets} = useWallets()
 	const { contractAddress } = router.query
 	const [collectedNumber, setCollectedNumber] = useState<number>(0)
+	const getProvider = async () =>{
+		const provider =  await (await wallets[0]?.getEthersProvider()).getSigner()
+		console.log(provider)
+		return provider
+	}
 	return (
 		<div className="relative font-azeretcus ">
 			<MintPageAudioPlayerContextProvider>
@@ -42,7 +48,7 @@ export default function MintPage() {
 							<MintPageAudioPlayer />
 							<div className="relative min-w-full top-[20rem] md:top-[17rem] xl:grid xl:grid-cols-2 xl:gap-2 xl:top-[15rem]">
 								<MintNftButton
-									provider={getEthersProvider()}
+									provider={getProvider()}
 									account={user?.wallet?.address}
 									isMintPage={true}
 								/>

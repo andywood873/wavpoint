@@ -30,13 +30,18 @@ function MyApp({ Component, pageProps }) {
 	return (
 		<PrivyProvider
 			appId={process.env.NEXT_PUBLIC_PRIVY_API_KEY}
-			createPrivyWalletOnLogin
+			// createPrivyWalletOnLogin
 			config={{
 				appearance: {
 					theme: "light",
 					accentColor: "#FF6700",
 					logo: "wavthe0ry-logo2@3x.png",
+					showWalletLoginFirst: true
 				},
+				embeddedWallets: {
+					createOnLogin: "users-without-wallets"
+				},
+				loginMethods: ["wallet", "email"]
 			}}
 			onSuccess={handleLogin}
 		>

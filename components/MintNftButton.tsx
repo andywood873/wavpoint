@@ -15,7 +15,7 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 	const [modalProgress, setModalProgress] = useState<number>(0)
 	const [isError, setIsError] = useState<boolean>(false)
 	const [txHash, setTxHash] = useState<string>()
-	const { authenticated, user, ready, signMessage } = usePrivy()
+	const { authenticated, user, ready, signMessage, sendTransaction } = usePrivy()
 	const handleModalClose = () => {
 		setIsModalOpen(false)
 		setTxHash("")
@@ -43,14 +43,15 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 				console.log("Transaction data Encoded")
 				console.log("Encoded Data")
 				console.log(data)
-				const signer = props.provider.getSigner()
+				const signer = await props.provider
 				console.log(signer)
-				const contractAddress = "0x99De3D08e756eA7DB0AC4B0b3717218d0b519DCC"
+				const contractAddress = "0xa2ed2c8d3535d425dCD12F72962D92B8f3900E1e"
 
-				const tx1: TransactionInterface = {
+				const tx1= {
 					to: contractAddress,
 					data: data,
-					value: ethers.utils.parseEther("0.00001"),
+					value: ethers.utils.parseEther("0.00001").toHexString(),
+					// chainId
 				}
 
 				setModalTitle(MintModalTitleEnum.createTx)
@@ -63,6 +64,15 @@ export default function MintNftButton(props: MintNftButtonInterface) {
 				let txReceipt
 				if (embeddedWallet) {
 					// signMessage(t)
+					// Replace this with the UnsignedTransactionRequest you'd like your user to send
+					// const provider = await embeddedWallet.get
+					// Replace this with the text you'd like on your transaction modal
+					const uiConfig = {
+						title: "Mint",
+						description: "Click on the mint button to mint this NFT ",
+						buttonText: "Mint",
+					}
+					txReceipt = await sendTransaction(tx1, uiConfig);
 					console.log("Embedded Wallet support yet to come!")
 				} else {
 					console.log("Creating transaction")

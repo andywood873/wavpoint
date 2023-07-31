@@ -449,7 +449,7 @@ export default function UploadSite(props) {
 				console.log("Encoded data")
 				console.log(data)
 				const tx1 = {
-					to: "0xFd4090D856923aC877F203Aa43c713Caca2D56BF",
+					to: "0xDe0eF01543Fc5e5f771e4775043DCF0F93FeFA45",
 					data: data,
 				}
 				const embeddedWallet = user.linkedAccounts.find(
@@ -469,51 +469,52 @@ export default function UploadSite(props) {
 					console.log("Sending traction")
 					const txReceipt = await txResponse.wait(1)
 					console.log(txReceipt)
-				}
-				const events = txReceipt.logs.map((log) => {
-					// if (log.topics[0] === createEventTopic) {
-					// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
-					// }
-					try {
-						return zoraDropInterface.decodeEventLog(
-							"CreatedDrop",
-							log.data,
-							log.topics,
-						)
-					} catch (error) {
+					const events = txReceipt.logs.map((log) => {
+						// if (log.topics[0] === createEventTopic) {
+						// 	address = splitInterface.decodeEventLog("CreateSplit",log.data,log.topics)
+						// }
+						try {
+							return zoraDropInterface.decodeEventLog(
+								"CreatedDrop",
+								log.data,
+								log.topics,
+							)
+						} catch (error) {
+							return
+						}
 						return
-					}
-					return
-				})
-				console.log("Events")
-				console.log(events)
-				let zoraDrop
-				events.forEach((e) => {
-					if (e !== undefined) {
-						setZoraDropCreated(true)
-						zoraDrop = e
-						setZoraDropAddress(e.editionContractAddress)
-						setModalTitle("NFT DROP Created!")
-						setModalBody(
-							`Your NFT has been minted in the address ${e.editionContractAddress}.`,
-						)
-					}
-				})
-				console.log(zoraDrop)
-				console.log(zoraDropAddress)
-				setModalProgress(100)
-
-				console.log("Sending to relayer")
-				// transaction.nonce = transaction.nonce + 1
-				// const txHash = await props.smartAccount.sendTransaction({
-				// 	tx: transaction,
-				// 	gasLimit,
-				// })
-
-				console.log("Transaction Hash")
-				console.log(txReceipt.transactionHash)
-				console.log("Transaction log")
-				// console.log(transaction)
+					})
+					console.log("Events")
+					console.log(events)
+					let zoraDrop
+					events.forEach((e) => {
+						if (e !== undefined) {
+							setZoraDropCreated(true)
+							zoraDrop = e
+							setZoraDropAddress(e.editionContractAddress)
+							setModalTitle("NFT DROP Created!")
+							setModalBody(
+								`Your NFT has been minted in the address ${e.editionContractAddress}.`,
+							)
+						}
+					})
+					console.log(zoraDrop)
+					console.log(zoraDropAddress)
+					setModalProgress(100)
+	
+					console.log("Sending to relayer")
+					// transaction.nonce = transaction.nonce + 1
+					// const txHash = await props.smartAccount.sendTransaction({
+					// 	tx: transaction,
+					// 	gasLimit,
+					// })
+	
+					console.log("Transaction Hash")
+					console.log(txReceipt.transactionHash)
+					console.log("Transaction log")
+					// console.log(transaction)
+				}
+				
 			} catch (error) {
 				console.error("Something went wrong")
 				console.log(error)
@@ -595,38 +596,39 @@ export default function UploadSite(props) {
 							console.log("Sending traction")
 							const txReceipt = await txResponse.wait(1)
 							console.log(txReceipt)
+							const events = txReceipt.logs.map((log) => {
+								try {
+									return splitInterface.decodeEventLog(
+										"CreateSplit",
+										log.data,
+										log.topics,
+									)
+								} catch (error) {
+									return
+								}
+								return
+							})
+	
+							let address
+							console.log("Events")
+							console.log(events)
+							events.forEach((e) => {
+								if (e !== undefined) {
+									address = e.split
+								}
+								console.log("Address")
+								console.log(address)
+								setSplitAddress(address)
+								setSplitCreated(true)
+								resolve(address)
+							})
+	
+							console.log("Transaction Hash")
+							console.log(txReceipt.transactionHash)
+							console.log("Transaction log")
 						}
 
-						const events = txReceipt.logs.map((log) => {
-							try {
-								return splitInterface.decodeEventLog(
-									"CreateSplit",
-									log.data,
-									log.topics,
-								)
-							} catch (error) {
-								return
-							}
-							return
-						})
-
-						let address
-						console.log("Events")
-						console.log(events)
-						events.forEach((e) => {
-							if (e !== undefined) {
-								address = e.split
-							}
-							console.log("Address")
-							console.log(address)
-							setSplitAddress(address)
-							setSplitCreated(true)
-							resolve(address)
-						})
-
-						console.log("Transaction Hash")
-						console.log(txReceipt.transactionHash)
-						console.log("Transaction log")
+						
 					} catch (error) {
 						console.warn("Rejected transaction or someting happended")
 						console.log(error)
